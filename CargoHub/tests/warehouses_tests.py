@@ -58,7 +58,6 @@ def test_get_all(setup_teardown):
         # Assert
         assert str(response.status) == '200'
         assert len(warehousesDict) == 2
-        assert True
         
 
     
