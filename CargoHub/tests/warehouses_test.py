@@ -18,7 +18,6 @@ def kill_api():
         if 'python3.12.exe' in line:
             pid = int(line.split()[1])
             os.kill(pid, signal.SIGTERM)
-    print("")
 
 @pytest.fixture
 def setup_teardown():
