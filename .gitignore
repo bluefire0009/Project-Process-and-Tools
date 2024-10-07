@@ -32,3 +32,4 @@ CargoHub/api/models/__pycache__/warehouses.cpython-312.pyc
 CargoHub/api/processors/__pycache__/notification_processor.cpython-312.pyc
 CargoHub/api/providers/__pycache__/auth_provider.cpython-312.pyc
 CargoHub/api/providers/__pycache__/data_provider.cpython-312.pyc
+CargoHub/tests/__pycache__/warehouses_test.cpython-311-pytest-8.3.3.pyc
