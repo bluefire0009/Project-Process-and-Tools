@@ -1,6 +1,5 @@
 import time
 import pytest
-import requests
 import http.client
 import json
 
