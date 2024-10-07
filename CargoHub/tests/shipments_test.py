@@ -4,17 +4,13 @@ import json
 import pytest
 import os
 
-shipmentsPath = './data/shipments.json'
+shipmentsPath = 'CargoHub\\data\\warehouses.json'
 
 
 def run_api():
     relative_path = 'start-system.bat'
     os.system('cd ..')
     os.system(relative_path)
-
-
-# Path to the shipments.json file
-shipmentsPath = './data/shipments.json'
 
 
 @pytest.fixture(scope='function')
@@ -35,7 +31,10 @@ def setup_teardown():
         shipmentsFile.write(original_content)
 
 
-def post_get_test(setup_teardown):
+def test_setup_teardown(setup_teardown):
     with open(shipmentsPath, 'r') as shipmentsFile:
         content = shipmentsFile.read()
     assert content == ""  # File should be empty because of setup
+
+
+def test_
