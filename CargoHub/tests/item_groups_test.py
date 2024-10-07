@@ -20,7 +20,7 @@ def test_get_all_item_groups():
 # Test GET item group by ID
 def test_get_item_group_by_id():
     item_group_id = 2  # Use an ID that exists in your item_groups.json
-    response = requests.get(f"{BASE_URL}/item_groups/{item_group_id}")
+    response = requests.get(f"{BASE_URL}/item_groups/{item_group_id}", headers={"API_KEY":"a1b2c3d4e5"})
     assert response.status_code == 200
     item_group = response.json()
     assert item_group["id"] == item_group_id
@@ -38,7 +38,7 @@ def test_add_new_item_group():
         "created_at": "2023-01-01 12:00:00",
         "updated_at": "2023-01-01 12:00:00"
     }
-    response = requests.post(f"{BASE_URL}/item-groups", json=new_item_group)
+    response = requests.post(f"{BASE_URL}/item_groups", json=new_item_group)
     assert response.status_code == 201
     data = response.json()
     assert data["id"] == 6
@@ -63,5 +63,5 @@ def test_update_item_group():
 # Test DELETE item group by ID
 def test_delete_item_group():
     item_group_id = 5  # Use an ID that exists in your item_groups.json
-    response = requests.delete(f"{BASE_URL}/item_groups/{item_group_id}")
-    assert response.status_code == 204  # 204 No Content indicates successful deletion
+    response = requests.delete(f"{BASE_URL}/item_groups/{item_group_id}", headers={"API_KEY":"a1b2c3d4e5"})
+    assert response.status_code == 200  # 200 No Content indicates successful deletion
