@@ -10,7 +10,7 @@ headers = {'API_KEY': 'a1b2c3d4e5', 'Content-Type': 'application/json'}
 
 def delete_test_order(connection: http.client.HTTPConnection):
     # delete location with "id": 99999
-    connection.request("DELETE", "/api/v1/locations/99999", headers=headers)
+    connection.request("DELETE", "/api/v1/orders/99999", headers=headers)
     response = connection.getresponse()
     assert response.status == 200
     connection.close()
@@ -19,15 +19,15 @@ def delete_test_order(connection: http.client.HTTPConnection):
 # not a test
 def post_order(connection: http.client.HTTPConnection):
     body = {
-        "id": 1,
+        "id": 99999,
         "source_id": 33,
         "order_date": "2019-04-03T11:33:15Z",
         "request_date": "2019-04-07T11:33:15Z",
         "reference": "ORD00001",
         "reference_extra": "Bedreven arm straffen bureau.",
         "order_status": "Delivered",
-        "notes": "Voedsel vijf vork heel.",
-        "shipping_notes": "Buurman betalen plaats bewolkt.",
+        "notes": "test_notes",
+        "shipping_notes": "AAAAAAAAAAAAAAa",
         "picking_notes": "Ademen fijn volgorde scherp aardappel op leren.",
         "warehouse_id": 18,
         "ship_to": None,
@@ -47,89 +47,13 @@ def post_order(connection: http.client.HTTPConnection):
             {
                 "item_id": "P009557",
                 "amount": 1
-            },
-            {
-                "item_id": "P009553",
-                "amount": 50
-            },
-            {
-                "item_id": "P010015",
-                "amount": 16
-            },
-            {
-                "item_id": "P002084",
-                "amount": 33
-            },
-            {
-                "item_id": "P009663",
-                "amount": 18
-            },
-            {
-                "item_id": "P010125",
-                "amount": 18
-            },
-            {
-                "item_id": "P005768",
-                "amount": 26
-            },
-            {
-                "item_id": "P004051",
-                "amount": 1
-            },
-            {
-                "item_id": "P005026",
-                "amount": 29
-            },
-            {
-                "item_id": "P000726",
-                "amount": 22
-            },
-            {
-                "item_id": "P008107",
-                "amount": 47
-            },
-            {
-                "item_id": "P001598",
-                "amount": 32
-            },
-            {
-                "item_id": "P002855",
-                "amount": 20
-            },
-            {
-                "item_id": "P010404",
-                "amount": 30
-            },
-            {
-                "item_id": "P010446",
-                "amount": 6
-            },
-            {
-                "item_id": "P001517",
-                "amount": 9
-            },
-            {
-                "item_id": "P009265",
-                "amount": 2
-            },
-            {
-                "item_id": "P001108",
-                "amount": 20
-            },
-            {
-                "item_id": "P009110",
-                "amount": 18
-            },
-            {
-                "item_id": "P009686",
-                "amount": 13
             }
         ]
     }
     json_body = json.dumps(body).encode('utf-8')
 
     # post location
-    connection.request("POST", "/api/v1/locations/", headers=headers, body=json_body)
+    connection.request("POST", "/api/v1/orders/", headers=headers, body=json_body)
     # get response
     response = connection.getresponse()
     # assert that it has created
@@ -138,3 +62,36 @@ def post_order(connection: http.client.HTTPConnection):
     response.close()
 
     return body
+
+
+def test_get_all_locations():
+    connection = http.client.HTTPConnection('localhost', 3000)
+    connection.request("GET", "/api/v1/orders", headers=headers)
+
+    response = connection.getresponse()
+    assert response.status == 200
+    data = json.loads(response.read())
+    assert isinstance(data, list)
+    connection.close()
+
+
+def test_post_get_orders():
+    connection = http.client.HTTPConnection('localhost', 3000)
+    body = post_order(connection)
+
+    # get the body just posted
+    connection.request("GET", f"/api/v1/orders/{body["id"]}", headers=headers)
+
+    response = connection.getresponse()
+    assert response.status == 200
+
+    data = response.read()
+    connection.close()
+
+    order_dict = json.loads(data)
+    assert len(order_dict) == 6
+    assert order_dict["notes"] == body["notes"]
+    assert order_dict["shipping_notes"] == body["shipping_notes"]
+
+
+    delete_test_order(connection)
