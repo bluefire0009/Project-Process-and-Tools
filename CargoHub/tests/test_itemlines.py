@@ -5,30 +5,6 @@ import json
 
 BASE_URL = "http://localhost:3000/api/v1"
 
-ITEMS_PATH = 'CargoHub/data/item_lines.json'
-
-
-@pytest.fixture
-def setup_teardown():
-    # Setup code
-    # Save the warehouses.json content
-    with open(ITEMS_PATH, 'r') as itemsFile:
-        global itemsBefore
-        itemsBefore = itemsFile.read()
-        itemsFile.close()
-
-    # Overwrite the content of warehouses.json with empty file
-    with open(ITEMS_PATH, 'w') as itemsFile:
-        itemsFile.write("")
-        itemsFile.close()
-
-    yield
-    # Teardown code
-    # Restore the content of warehouses.json
-    with open(ITEMS_PATH, 'w') as itemsFile:
-        itemsFile.write(itemsBefore)
-        itemsFile.close()
-
 
 def test_get_all_item_lines():
     connection = http.client.HTTPConnection('localhost', 3000)

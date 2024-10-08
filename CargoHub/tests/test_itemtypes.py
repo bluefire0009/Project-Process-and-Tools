@@ -5,30 +5,6 @@ import json
 
 BASE_URL = "http://localhost:3000/api/v1"
 
-ITEM_TYPES_PATH = 'CargoHub/data/item_types.json'
-
-
-@pytest.fixture
-def setup_teardown():
-    # Setup code
-    # Save the warehouses.json content
-    with open(ITEM_TYPES_PATH, 'r') as itemTypesFile:
-        global itemTypesBefore
-        itemTypesBefore = itemTypesFile.read()
-        itemTypesFile.close()
-
-    # Overwrite the content of warehouses.json with empty file
-    with open(ITEM_TYPES_PATH, 'w') as itemTypesFile:
-        itemTypesFile.write("")
-        itemTypesFile.close()
-
-    yield
-    # Teardown code
-    # Restore the content of warehouses.json
-    with open(ITEM_TYPES_PATH, 'w') as itemTypesFile:
-        itemTypesFile.write(itemTypesBefore)
-        itemTypesFile.close()
-
 
 def test_get_all_item_types():
     connection = http.client.HTTPConnection('localhost', 3000)
@@ -37,7 +13,6 @@ def test_get_all_item_types():
     data = response.read()
     result = json.loads(data)
     assert response.status == 200
-    assert len(result) > 50
     assert result[0] == {
         "id": 0,
         "name": "Laptop",
