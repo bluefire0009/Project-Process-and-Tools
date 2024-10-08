@@ -29,18 +29,35 @@ def test_get_item_group_by_id():
     assert "created_at" in item_group
     assert "updated_at" in item_group
 
+def test_add_new_item_group():
+    new_item_group = {
+        "id": 999999999,
+        "name": "Electronics",
+        "description": "Electronic devices",
+        "created_at": "2023-01-01 12:00:00",
+        "updated_at": "2023-01-01 12:00:00"
+    }
+    response = requests.post(f"{BASE_URL}/item-groups", json=new_item_group, headers={"API_KEY":"a1b2c3d4e5"})
+    assert response.status_code == 201
+    data = response.json()
+    assert data["id"] == 999999999
+    assert data["name"] == "Electronics"
+
 # Test PUT update item group
 # To check it first make a put request, and to see it was changed make a get request
+# MAAK HIER EEN GET OM DE DATA IN TIJDELIJKE VARAIABLE OPTESLAAN!!!
 def test_update_item_group():
+    item_group_id = 99
+    data_out_of_json_to_restore = requests.get(f"{BASE_URL}/item_groups/{item_group_id}", headers={"API_KEY":"a1b2c3d4e5"}).json()
     updated_item_group = {
-        "id": 3,
+        "id": 100,
         "name": "Updated Stationeries",
         "description": "Updated description",
         "created_at": "1999-08-14 13:39:27",
         "updated_at": "2023-01-01 12:00:00"
     }
     
-    item_group_id = 3
+    item_group_id = 99
     
     # Update the item group using PUT request
     put_response = requests.put(f"{BASE_URL}/item_groups/{item_group_id}", json=updated_item_group, headers={"API_KEY":"a1b2c3d4e5"})
@@ -49,7 +66,7 @@ def test_update_item_group():
     assert put_response.status_code == 200
     
     # Now make a GET request to verify the update
-    get_response = requests.get(f"{BASE_URL}/item_groups/{item_group_id}", headers={"API_KEY":"a1b2c3d4e5"})
+    get_response = requests.get(f"{BASE_URL}/item_groups/{updated_item_group['id']}", headers={"API_KEY":"a1b2c3d4e5"})
     
     # Ensure the GET response is successful (200 OK)
     assert get_response.status_code == 200
@@ -58,6 +75,10 @@ def test_update_item_group():
     data = get_response.json()
     assert data["name"] == "Updated Stationeries"
     assert data["description"] == "Updated description"
+
+    # MAAK HIER EEN NIEUWE PUT OM DE EERDER OPGEVRAAGDE DATA WEER TE RESTOREN
+    put_response = requests.put(f"{BASE_URL}/item_groups/{updated_item_group['id']}", json=data_out_of_json_to_restore, headers={"API_KEY":"a1b2c3d4e5"})
+
 
 # Test DELETE item group by ID
 def test_delete_item_group():
