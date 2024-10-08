@@ -5,13 +5,16 @@ import json
 
 
 @pytest.fixture
-def _key():
-    return "a1b2c3d4e5"
+def _DataPytestFixture():
+    url = '/api/v1'
+    apikey = 'a1b2c3d4e5'
+    return url, apikey
 
 
-def test_get_all_items(_key):
+def test_get_all_items(_DataPytestFixture):
+    url, key = _DataPytestFixture
     connection = http.client.HTTPConnection('localhost', 3000)
-    connection.request('GET', "/api/v1/items", headers={"API_KEY": _key})
+    connection.request('GET', f"{url}/items", headers={"APIkey": key})
     response = connection.getresponse()
     data = response.read()
     result = json.loads(data)
@@ -19,7 +22,8 @@ def test_get_all_items(_key):
     assert isinstance(result, list)
 
 
-def test_get_item_by_id(_key):
+def test_get_item_by_id(_DataPytestFixture):
+    url, key = _DataPytestFixture
     connection = http.client.HTTPConnection('localhost', 3000)
 
     jsonData = json.dumps({
@@ -44,20 +48,20 @@ def test_get_item_by_id(_key):
     })
     connection.request(
         'POST',
-        "/api/v1/items",
+        f"{url}/items",
         headers={
-            "API_KEY": _key,
+            "APIkey": key,
             "Content-Type": "application/json"},
         body=jsonData)
     connection.getresponse()
     time.sleep(5)
 
-    connection.request('GET', "/api/v1/items/P999999", headers={"API_KEY": _key})
+    connection.request('GET', f"{url}/items/P999999", headers={"APIkey": key})
     response = connection.getresponse()
     data = response.read()
     result = json.loads(data)
 
-    connection.request('DELETE', "/api/v1/items/P999999", headers={"API_KEY": _key})
+    connection.request('DELETE', f"{url}/items/P999999", headers={"APIkey": key})
 
     assert response.status == 200
     assert result["uid"] == "P999999"
@@ -78,9 +82,10 @@ def test_get_item_by_id(_key):
     assert result["supplier_part_number"] == "ZH-103509-MLv"
 
 
-def test_get_item_inventory(_key):
+def test_get_item_inventory(_DataPytestFixture):
+    url, key = _DataPytestFixture
     connection = http.client.HTTPConnection('localhost', 3000)
-    connection.request('GET', "/api/v1/items/P000002/inventory", headers={"API_KEY": _key})
+    connection.request('GET', f"{url}/items/P000002/inventory", headers={"APIkey": key})
     response = connection.getresponse()
     data = response.read()
     result = json.loads(data)
@@ -114,9 +119,10 @@ def test_get_item_inventory(_key):
     }
 
 
-def test_get_item_inventory_totals(_key):
+def test_get_item_inventory_totals(_DataPytestFixture):
+    url, key = _DataPytestFixture
     connection = http.client.HTTPConnection('localhost', 3000)
-    connection.request('GET', "/api/v1/items/P000002/inventory/totals", headers={"API_KEY": _key})
+    connection.request('GET', f"{url}/items/P000002/inventory/totals", headers={"APIkey": key})
     response = connection.getresponse()
     data = response.read()
     result = json.loads(data)
@@ -130,7 +136,8 @@ def test_get_item_inventory_totals(_key):
     }
 
 
-def test_post_item(_key):
+def test_post_item(_DataPytestFixture):
+    url, key = _DataPytestFixture
     connection = http.client.HTTPConnection('localhost', 3000)
     jsonData = json.dumps({
         "uid": "P999999",
@@ -154,20 +161,21 @@ def test_post_item(_key):
     })
     connection.request(
         'POST',
-        "/api/v1/items",
+        f"{url}/items",
         headers={
-            "API_KEY": _key,
+            "APIkey": key,
             "Content-Type": "application/json"},
         body=jsonData)
     time.sleep(1)
     response = connection.getresponse()
 
-    connection.request('DELETE', "/api/v1/items/P999999", headers={"API_KEY": _key})
+    connection.request('DELETE', f"{url}/items/P999999", headers={"APIkey": key})
 
     assert response.status == 201
 
 
-def test_put_item(_key):
+def test_put_item(_DataPytestFixture):
+    url, key = _DataPytestFixture
     connection = http.client.HTTPConnection('localhost', 3000)
     jsonData = json.dumps({
         "uid": "P999999",
@@ -191,9 +199,9 @@ def test_put_item(_key):
     })
     connection.request(
         'POST',
-        "/api/v1/items",
+        f"{url}/items",
         headers={
-            "API_KEY": _key,
+            "APIkey": key,
             "Content-Type": "application/json"},
         body=jsonData)
 
@@ -221,9 +229,9 @@ def test_put_item(_key):
     connection = http.client.HTTPConnection('localhost', 3000)
     connection.request(
         'PUT',
-        "/api/v1/items/P999999",
+        f"{url}/items/P999999",
         headers={
-            "API_KEY": _key,
+            "APIkey": key,
             "Content-Type": "application/json"},
         body=jsonData)
     time.sleep(2)
@@ -231,16 +239,17 @@ def test_put_item(_key):
 
     assert response.code == 200
 
-    connection.request('GET', "/api/v1/items/P999999", headers={"API_KEY": _key})
+    connection.request('GET', f"{url}/items/P999999", headers={"APIkey": key})
     response = connection.getresponse()
     data = response.read()
     result = json.loads(data)
 
-    connection.request('DELETE', "/api/v1/items/P999999", headers={"API_KEY": _key})
+    connection.request('DELETE', f"{url}/items/P999999", headers={"APIkey": key})
     assert result['description'] == "test123"
 
 
-def test_delete_item(_key):
+def test_delete_item(_DataPytestFixture):
+    url, key = _DataPytestFixture
     connection = http.client.HTTPConnection('localhost', 3000)
     jsonData = json.dumps({
         "uid": "P999999",
@@ -264,15 +273,15 @@ def test_delete_item(_key):
     })
     connection.request(
         'POST',
-        "/api/v1/items",
+        f"{url}/items",
         headers={
-            "API_KEY": _key,
+            "APIkey": key,
             "Content-Type": "application/json"},
         body=jsonData)
     response = connection.getresponse()
     assert response.code == 201, "insertion failed"
 
-    connection.request('DELETE', "/api/v1/items/P999999", headers={"API_KEY": _key})
+    connection.request('DELETE', f"{url}/items/P999999", headers={"APIkey": key})
     response = connection.getresponse()
 
     assert response.code == 200
