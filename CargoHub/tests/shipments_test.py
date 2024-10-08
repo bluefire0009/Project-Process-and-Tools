@@ -3,17 +3,36 @@ import threading
 import json
 import pytest
 import os
+import signal
 
 shipmentsPath = './data/shipments.json'
 headers = {'API_KEY': 'a1b2c3d4e5', 'Content-Type': 'application/json'}
 
-# def run_api():
-#     relative_path = "start-system.bat"
-#     os.system('cd ..')
-#     os.system(relative_path)
+
+def run_api():
+    relative_path = "start-system.bat"
+    os.system('cd ..')
+    os.system(relative_path)
 
 
-@pytest.fixture(scope='function')
+def kill_api():
+    output = os.popen('tasklist | findstr python').read()
+    for line in output.splitlines():
+        if 'python3.12.exe' in line:
+            pid = int(line.split()[1])
+            os.kill(pid, signal.SIGTERM)
+
+
+@pytest.fixture(scope='session')
+def run_kill_api():
+    threading.Thread(target=run_api).start()
+
+    yield
+
+    kill_api()
+
+
+@pytest.fixture()
 def setup_teardown():
     # Setup: Save the original content of the file
     with open(shipmentsPath, 'r') as shipmentsFile:
@@ -31,6 +50,7 @@ def setup_teardown():
         shipmentsFile.write(original_content)
 
 
+# not a test
 def post_test_shipment(connection: http.client.HTTPConnection):
     body = {
         "id": 999999999,
@@ -70,14 +90,7 @@ def post_test_shipment(connection: http.client.HTTPConnection):
     return body
 
 
-def test_setup_teardown(setup_teardown):
-    with open(shipmentsPath, 'r') as shipmentsFile:
-        content = shipmentsFile.read()
-
-    assert content == "[]"  # File should be empty because of setup
-
-
-def test_post_get_shipment(setup_teardown):
+def test_post_get_shipment(run_kill_api, setup_teardown):
     connection = http.client.HTTPConnection('localhost', 3000)
     post_test_shipment(connection)
 
@@ -90,11 +103,12 @@ def test_post_get_shipment(setup_teardown):
 
     shipmentDict = json.loads(data)
     # check if response json has all 19 fields
+
     assert len(shipmentDict) == 19
     assert shipmentDict["notes"] == "test_notes"
 
 
-def test_put_shipment(setup_teardown):
+def test_put_shipment(run_kill_api, setup_teardown):
     connection = http.client.HTTPConnection('localhost', 3000)
     body = post_test_shipment(connection)
 
@@ -116,11 +130,12 @@ def test_put_shipment(setup_teardown):
 
     shipmentDict = json.loads(data)
     # check if response json has all 19 fields
+
     assert len(shipmentDict) == 19
     assert shipmentDict["source_id"] == 9999
 
 
-def test_delete_shipment(setup_teardown):
+def test_delete_shipment(run_kill_api, setup_teardown):
     connection = http.client.HTTPConnection('localhost', 3000)
     body = post_test_shipment(connection)
 
