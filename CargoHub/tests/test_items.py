@@ -3,12 +3,15 @@ import pytest
 import http.client
 import json
 
-BASE_URL = "http://localhost:3000/api/v1"
+
+@pytest.fixture
+def _key():
+    return "a1b2c3d4e5"
 
 
-def test_get_all_items():
+def test_get_all_items(_key):
     connection = http.client.HTTPConnection('localhost', 3000)
-    connection.request('GET', "/api/v1/items", headers={"API_KEY": "a1b2c3d4e5"})
+    connection.request('GET', "/api/v1/items", headers={"API_KEY": _key})
     response = connection.getresponse()
     data = response.read()
     result = json.loads(data)
@@ -16,7 +19,7 @@ def test_get_all_items():
     assert isinstance(result, list)
 
 
-def test_get_item_by_id():
+def test_get_item_by_id(_key):
     connection = http.client.HTTPConnection('localhost', 3000)
 
     jsonData = json.dumps({
@@ -43,18 +46,18 @@ def test_get_item_by_id():
         'POST',
         "/api/v1/items",
         headers={
-            "API_KEY": "a1b2c3d4e5",
+            "API_KEY": _key,
             "Content-Type": "application/json"},
         body=jsonData)
     connection.getresponse()
     time.sleep(5)
 
-    connection.request('GET', "/api/v1/items/P999999", headers={"API_KEY": "a1b2c3d4e5"})
+    connection.request('GET', "/api/v1/items/P999999", headers={"API_KEY": _key})
     response = connection.getresponse()
     data = response.read()
     result = json.loads(data)
 
-    connection.request('DELETE', "/api/v1/items/P999999", headers={"API_KEY": "a1b2c3d4e5"})
+    connection.request('DELETE', "/api/v1/items/P999999", headers={"API_KEY": _key})
 
     assert response.status == 200
     assert result["uid"] == "P999999"
@@ -75,9 +78,9 @@ def test_get_item_by_id():
     assert result["supplier_part_number"] == "ZH-103509-MLv"
 
 
-def test_get_item_inventory():
+def test_get_item_inventory(_key):
     connection = http.client.HTTPConnection('localhost', 3000)
-    connection.request('GET', "/api/v1/items/P000002/inventory", headers={"API_KEY": "a1b2c3d4e5"})
+    connection.request('GET', "/api/v1/items/P000002/inventory", headers={"API_KEY": _key})
     response = connection.getresponse()
     data = response.read()
     result = json.loads(data)
@@ -111,9 +114,9 @@ def test_get_item_inventory():
     }
 
 
-def test_get_item_inventory_totals():
+def test_get_item_inventory_totals(_key):
     connection = http.client.HTTPConnection('localhost', 3000)
-    connection.request('GET', "/api/v1/items/P000002/inventory/totals", headers={"API_KEY": "a1b2c3d4e5"})
+    connection.request('GET', "/api/v1/items/P000002/inventory/totals", headers={"API_KEY": _key})
     response = connection.getresponse()
     data = response.read()
     result = json.loads(data)
@@ -127,7 +130,7 @@ def test_get_item_inventory_totals():
     }
 
 
-def test_post_item():
+def test_post_item(_key):
     connection = http.client.HTTPConnection('localhost', 3000)
     jsonData = json.dumps({
         "uid": "P999999",
@@ -153,18 +156,18 @@ def test_post_item():
         'POST',
         "/api/v1/items",
         headers={
-            "API_KEY": "a1b2c3d4e5",
+            "API_KEY": _key,
             "Content-Type": "application/json"},
         body=jsonData)
     time.sleep(1)
     response = connection.getresponse()
 
-    connection.request('DELETE', "/api/v1/items/P999999", headers={"API_KEY": "a1b2c3d4e5"})
+    connection.request('DELETE', "/api/v1/items/P999999", headers={"API_KEY": _key})
 
     assert response.status == 201
 
 
-def test_put_item():
+def test_put_item(_key):
     connection = http.client.HTTPConnection('localhost', 3000)
     jsonData = json.dumps({
         "uid": "P999999",
@@ -190,7 +193,7 @@ def test_put_item():
         'POST',
         "/api/v1/items",
         headers={
-            "API_KEY": "a1b2c3d4e5",
+            "API_KEY": _key,
             "Content-Type": "application/json"},
         body=jsonData)
 
@@ -220,7 +223,7 @@ def test_put_item():
         'PUT',
         "/api/v1/items/P999999",
         headers={
-            "API_KEY": "a1b2c3d4e5",
+            "API_KEY": _key,
             "Content-Type": "application/json"},
         body=jsonData)
     time.sleep(2)
@@ -228,16 +231,16 @@ def test_put_item():
 
     assert response.code == 200
 
-    connection.request('GET', "/api/v1/items/P999999", headers={"API_KEY": "a1b2c3d4e5"})
+    connection.request('GET', "/api/v1/items/P999999", headers={"API_KEY": _key})
     response = connection.getresponse()
     data = response.read()
     result = json.loads(data)
 
-    connection.request('DELETE', "/api/v1/items/P999999", headers={"API_KEY": "a1b2c3d4e5"})
+    connection.request('DELETE', "/api/v1/items/P999999", headers={"API_KEY": _key})
     assert result['description'] == "test123"
 
 
-def test_delete_item():
+def test_delete_item(_key):
     connection = http.client.HTTPConnection('localhost', 3000)
     jsonData = json.dumps({
         "uid": "P999999",
@@ -263,13 +266,13 @@ def test_delete_item():
         'POST',
         "/api/v1/items",
         headers={
-            "API_KEY": "a1b2c3d4e5",
+            "API_KEY": _key,
             "Content-Type": "application/json"},
         body=jsonData)
     response = connection.getresponse()
     assert response.code == 201, "insertion failed"
 
-    connection.request('DELETE', "/api/v1/items/P999999", headers={"API_KEY": "a1b2c3d4e5"})
+    connection.request('DELETE', "/api/v1/items/P999999", headers={"API_KEY": _key})
     response = connection.getresponse()
 
     assert response.code == 200
