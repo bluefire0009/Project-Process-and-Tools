@@ -1,52 +1,113 @@
 import http.client
-import threading
 import json
 import pytest
-import os
-import signal
 
-shipmentsPath = './data/locations.json'
+
 headers = {'API_KEY': 'a1b2c3d4e5', 'Content-Type': 'application/json'}
 
-
-def run_api():
-    relative_path = "start-system.bat"
-    os.system('cd ..')
-    os.system(relative_path)
+# not a test
 
 
-def kill_api():
-    output = os.popen('tasklist | findstr python').read()
-    for line in output.splitlines():
-        if 'python3.12.exe' in line:
-            pid = int(line.split()[1])
-            os.kill(pid, signal.SIGTERM)
+def delete_test_location(connection: http.client.HTTPConnection):
+    # delete location with "id": 99999
+    connection.request("DELETE", "/api/v1/locations/99999", headers=headers)
+    response = connection.getresponse()
+    assert response.status == 200
+    connection.close()
 
 
-@pytest.fixture(scope='session')
-def run_kill_api():
-    threading.Thread(target=run_api).start()
+# not a test
+def post_location(connection: http.client.HTTPConnection):
+    body = {
+        "id": 99999,
+        "warehouse_id": 99999,
+        "code": "test_code",
+        "name": "test_name",
+        "created_at": "",
+        "updated_at": ""
+    }
+    json_body = json.dumps(body).encode('utf-8')
 
-    yield
+    # post location
+    connection.request("POST", "/api/v1/locations/", headers=headers, body=json_body)
+    # get response
+    response = connection.getresponse()
+    # assert that it has created
+    assert response.status == 201
+    # close connection
+    response.close()
 
-    kill_api()
+    return body
 
 
-@pytest.fixture()
-def setup_teardown():
-    # Setup: Save the original content of the file
-    with open(shipmentsPath, 'r') as shipmentsFile:
-        original_content = shipmentsFile.read()
+def test_get_all_locations():
+    connection = http.client.HTTPConnection('localhost', 3000)
+    connection.request("GET", "/api/v1/locations", headers=headers)
 
-    # Clear the file for the test
-    with open(shipmentsPath, 'w') as shipmentsFile:
-        shipmentsFile.write("[]")
+    response = connection.getresponse()
+    assert response.status == 200
+    data = json.loads(response.read())
+    assert isinstance(data, list)
+    connection.close()
 
-    # Provide this setup to the test and then ensure cleanup runs afterward
-    yield
 
-    # Teardown: Restore the file to its original content
-    with open(shipmentsPath, 'w') as shipmentsFile:
-        shipmentsFile.write(original_content)
+def test_post_get_location():
+    connection = http.client.HTTPConnection('localhost', 3000)
+    body = post_location(connection)
 
-def 
+    # get the body just posted
+    connection.request("GET", f"/api/v1/locations/{body["id"]}", headers=headers)
+
+    response = connection.getresponse()
+    assert response.status == 200
+
+    data = response.read()
+    connection.close()
+
+    location_dict = json.loads(data)
+    assert len(location_dict) == 6
+    assert location_dict["id"] == body["id"]
+    assert location_dict["warehouse_id"] == body["warehouse_id"]
+    assert location_dict["code"] == body["code"]
+    assert location_dict["name"] == body["name"]
+
+    delete_test_location(connection)
+
+
+def test_put_location():
+    connection = http.client.HTTPConnection('localhost', 3000)
+    body = post_location(connection)
+
+    # adjust locaton and PUT it
+    body["code"] = "changed_code"
+    json_body = json.dumps(body).encode('utf-8')
+    connection.request("PUT", f"/api/v1/locations/{body["id"]}", headers=headers, body=json_body)
+    connection.close()
+
+    # GET adjusted location
+    # get the body just posted
+    connection.request("GET", f"/api/v1/locations/{body["id"]}", headers=headers)
+
+    response = connection.getresponse()
+    assert response.status == 200
+
+    data = response.read()
+    connection.close()
+
+    location_dict = json.loads(data)
+    assert len(location_dict) == 6
+    assert location_dict["id"] == body["id"]
+    assert location_dict["warehouse_id"] == body["warehouse_id"]
+    assert location_dict["code"] == body["code"]
+    assert location_dict["name"] == body["name"]
+
+    delete_test_location(connection)
+
+def test_delete_location():
+    connection = http.client.HTTPConnection('localhost', 3000)
+    # post location
+    body = post_location(connection)
+    # delte location
+    delete_test_location(connection)
+
+
