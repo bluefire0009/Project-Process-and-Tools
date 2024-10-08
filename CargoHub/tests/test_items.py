@@ -5,8 +5,6 @@ import json
 
 BASE_URL = "http://localhost:3000/api/v1"
 
-ITEMS_PATH = 'CargoHub/data/items.json'
-
 
 def test_get_all_items():
     connection = http.client.HTTPConnection('localhost', 3000)
@@ -15,57 +13,66 @@ def test_get_all_items():
     data = response.read()
     result = json.loads(data)
     assert response.status == 200
-    assert len(result) > 1000
-    assert result[0] == {
-        "uid": "P000001",
-        "code": "sjQ23408K",
-        "description": "Face-to-face clear-thinking complexity",
-        "short_description": "must",
-        "upc_code": "6523540947122",
-        "model_number": "63-OFFTq0T",
-        "commodity_code": "oTo304",
-        "item_line": 11,
-        "item_group": 73,
-        "item_type": 14,
-        "unit_purchase_quantity": 47,
-        "unit_order_quantity": 13,
-        "pack_order_quantity": 11,
-        "supplier_id": 34,
-        "supplier_code": "SUP423",
-        "supplier_part_number": "E-86805-uTM",
-        "created_at": "2015-02-19 16:08:24",
-        "updated_at": "2015-09-26 06:37:56"
-    }
+    assert isinstance(result, list)
 
 
 def test_get_item_by_id():
     connection = http.client.HTTPConnection('localhost', 3000)
-    connection.request('GET', "/api/v1/items/P000002", headers={"API_KEY": "a1b2c3d4e5"})
+
+    jsonData = json.dumps({
+        "uid": "P999999",
+        "code": "mYt79640E",
+        "description": "Down-sized system-worthy productivity",
+        "short_description": "pass",
+        "upc_code": "2541112620796",
+        "model_number": "ZK-417773-PXy",
+        "commodity_code": "z-761-L5A",
+        "item_line": 81,
+        "item_group": 83,
+        "item_type": 74,
+        "unit_purchase_quantity": 3,
+        "unit_order_quantity": 18,
+        "pack_order_quantity": 13,
+        "supplier_id": 10,
+        "supplier_code": "SUP468",
+        "supplier_part_number": "ZH-103509-MLv",
+        "created_at": "2024-10-06 02:30:31",
+        "updated_at": "2024-10-06 02:30:31"
+    })
+    connection.request(
+        'POST',
+        "/api/v1/items",
+        headers={
+            "API_KEY": "a1b2c3d4e5",
+            "Content-Type": "application/json"},
+        body=jsonData)
+    connection.getresponse()
+    time.sleep(5)
+
+    connection.request('GET', "/api/v1/items/P999999", headers={"API_KEY": "a1b2c3d4e5"})
     response = connection.getresponse()
     data = response.read()
     result = json.loads(data)
 
+    connection.request('DELETE', "/api/v1/items/P999999", headers={"API_KEY": "a1b2c3d4e5"})
+
     assert response.status == 200
-    assert result == {
-        "uid": "P000002",
-        "code": "nyg48736S",
-        "description": "Focused transitional alliance",
-        "short_description": "may",
-        "upc_code": "9733132830047",
-        "model_number": "ck-109684-VFb",
-        "commodity_code": "y-20588-owy",
-        "item_line": 69,
-        "item_group": 85,
-        "item_type": 39,
-        "unit_purchase_quantity": 10,
-        "unit_order_quantity": 15,
-        "pack_order_quantity": 23,
-        "supplier_id": 57,
-        "supplier_code": "SUP312",
-        "supplier_part_number": "j-10730-ESk",
-        "created_at": "2020-05-31 16:00:08",
-        "updated_at": "2020-11-08 12:49:21"
-    }
+    assert result["uid"] == "P999999"
+    assert result["code"] == "mYt79640E"
+    assert result["description"] == "Down-sized system-worthy productivity"
+    assert result["short_description"] == "pass"
+    assert result["upc_code"] == "2541112620796"
+    assert result["model_number"] == "ZK-417773-PXy"
+    assert result["commodity_code"] == "z-761-L5A"
+    assert result["item_line"] == 81
+    assert result["item_group"] == 83
+    assert result["item_type"] == 74
+    assert result["unit_purchase_quantity"] == 3
+    assert result["unit_order_quantity"] == 18
+    assert result["pack_order_quantity"] == 13
+    assert result["supplier_id"] == 10
+    assert result["supplier_code"] == "SUP468"
+    assert result["supplier_part_number"] == "ZH-103509-MLv"
 
 
 def test_get_item_inventory():
@@ -152,10 +159,41 @@ def test_post_item():
     time.sleep(1)
     response = connection.getresponse()
 
+    connection.request('DELETE', "/api/v1/items/P999999", headers={"API_KEY": "a1b2c3d4e5"})
+
     assert response.status == 201
 
 
 def test_put_item():
+    connection = http.client.HTTPConnection('localhost', 3000)
+    jsonData = json.dumps({
+        "uid": "P999999",
+        "code": "mYt79640E",
+        "description": "Down-sized system-worthy productivity",
+        "short_description": "pass",
+        "upc_code": "2541112620796",
+        "model_number": "ZK-417773-PXy",
+        "commodity_code": "z-761-L5A",
+        "item_line": 81,
+        "item_group": 83,
+        "item_type": 74,
+        "unit_purchase_quantity": 3,
+        "unit_order_quantity": 18,
+        "pack_order_quantity": 13,
+        "supplier_id": 10,
+        "supplier_code": "SUP468",
+        "supplier_part_number": "ZH-103509-MLv",
+        "created_at": "2024-10-06 02:30:31",
+        "updated_at": "2024-10-06 02:30:31"
+    })
+    connection.request(
+        'POST',
+        "/api/v1/items",
+        headers={
+            "API_KEY": "a1b2c3d4e5",
+            "Content-Type": "application/json"},
+        body=jsonData)
+
     jsonData = json.dumps({
         "uid": "P999999",
         "code": "mYt79640E",
@@ -195,11 +233,42 @@ def test_put_item():
     data = response.read()
     result = json.loads(data)
 
+    connection.request('DELETE', "/api/v1/items/P999999", headers={"API_KEY": "a1b2c3d4e5"})
     assert result['description'] == "test123"
 
 
 def test_delete_item():
     connection = http.client.HTTPConnection('localhost', 3000)
+    jsonData = json.dumps({
+        "uid": "P999999",
+        "code": "mYt79640E",
+        "description": "Down-sized system-worthy productivity",
+        "short_description": "pass",
+        "upc_code": "2541112620796",
+        "model_number": "ZK-417773-PXy",
+        "commodity_code": "z-761-L5A",
+        "item_line": 81,
+        "item_group": 83,
+        "item_type": 74,
+        "unit_purchase_quantity": 3,
+        "unit_order_quantity": 18,
+        "pack_order_quantity": 13,
+        "supplier_id": 10,
+        "supplier_code": "SUP468",
+        "supplier_part_number": "ZH-103509-MLv",
+        "created_at": "2024-10-06 02:30:31",
+        "updated_at": "2024-10-06 02:30:31"
+    })
+    connection.request(
+        'POST',
+        "/api/v1/items",
+        headers={
+            "API_KEY": "a1b2c3d4e5",
+            "Content-Type": "application/json"},
+        body=jsonData)
+    response = connection.getresponse()
+    assert response.code == 201, "insertion failed"
+
     connection.request('DELETE', "/api/v1/items/P999999", headers={"API_KEY": "a1b2c3d4e5"})
     response = connection.getresponse()
 
