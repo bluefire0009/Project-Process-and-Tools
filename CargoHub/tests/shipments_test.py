@@ -1,36 +1,20 @@
 import http.client
-import threading
 import json
 import pytest
-import os
 
-shipmentsPath = './data/shipments.json'
 headers = {'API_KEY': 'a1b2c3d4e5', 'Content-Type': 'application/json'}
 
-# def run_api():
-#     relative_path = "start-system.bat"
-#     os.system('cd ..')
-#     os.system(relative_path)
+
+# not a test
+def delete_test_shipment(connection: http.client.HTTPConnection):
+    # delete shipment with "id": 999999999
+    connection.request("DELETE", "/api/v1/shipments/999999999", headers=headers)
+    response = connection.getresponse()
+    assert response.status == 200
+    connection.close()
 
 
-@pytest.fixture(scope='function')
-def setup_teardown():
-    # Setup: Save the original content of the file
-    with open(shipmentsPath, 'r') as shipmentsFile:
-        original_content = shipmentsFile.read()
-
-    # Clear the file for the test
-    with open(shipmentsPath, 'w') as shipmentsFile:
-        shipmentsFile.write("[]")
-
-    # Provide this setup to the test and then ensure cleanup runs afterward
-    yield
-
-    # Teardown: Restore the file to its original content
-    with open(shipmentsPath, 'w') as shipmentsFile:
-        shipmentsFile.write(original_content)
-
-
+# not a test
 def post_test_shipment(connection: http.client.HTTPConnection):
     body = {
         "id": 999999999,
@@ -70,14 +54,18 @@ def post_test_shipment(connection: http.client.HTTPConnection):
     return body
 
 
-def test_setup_teardown(setup_teardown):
-    with open(shipmentsPath, 'r') as shipmentsFile:
-        content = shipmentsFile.read()
+def test_get_all_shipments():
+    connection = http.client.HTTPConnection('localhost', 3000)
+    connection.request("GET", "/api/v1/shipments", headers=headers)
 
-    assert content == "[]"  # File should be empty because of setup
+    response = connection.getresponse()
+    assert response.status == 200
+    data = json.loads(response.read())
+    assert isinstance(data, list)
+    connection.close()
 
 
-def test_post_get_shipment(setup_teardown):
+def test_post_get_shipment():
     connection = http.client.HTTPConnection('localhost', 3000)
     post_test_shipment(connection)
 
@@ -90,11 +78,15 @@ def test_post_get_shipment(setup_teardown):
 
     shipmentDict = json.loads(data)
     # check if response json has all 19 fields
+
     assert len(shipmentDict) == 19
     assert shipmentDict["notes"] == "test_notes"
 
+    # cleanup
+    delete_test_shipment(connection)
 
-def test_put_shipment(setup_teardown):
+
+def test_put_shipment():
     connection = http.client.HTTPConnection('localhost', 3000)
     body = post_test_shipment(connection)
 
@@ -116,21 +108,18 @@ def test_put_shipment(setup_teardown):
 
     shipmentDict = json.loads(data)
     # check if response json has all 19 fields
+
     assert len(shipmentDict) == 19
     assert shipmentDict["source_id"] == 9999
 
+    delete_test_shipment(connection)
 
-def test_delete_shipment(setup_teardown):
+
+def test_delete_shipment():
     connection = http.client.HTTPConnection('localhost', 3000)
     body = post_test_shipment(connection)
 
     # delete shipment with "id": 999999999
-    connection.request("DELETE", "/api/v1/shipments/999999999", headers=headers)
-    response = connection.getresponse()
-    assert response.status == 200
-    connection.close()
-
-    # have to delete shipments twice. For some reason the api (sometimes????) posts the shipment twice
     connection.request("DELETE", "/api/v1/shipments/999999999", headers=headers)
     response = connection.getresponse()
     assert response.status == 200
