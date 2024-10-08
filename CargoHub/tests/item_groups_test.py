@@ -29,6 +29,7 @@ def test_get_item_group_by_id():
     assert "created_at" in item_group
     assert "updated_at" in item_group
 
+# This test doesn't work at the moment because there isnt any post endpoint in the code YET
 def test_add_new_item_group():
     new_item_group = {
         "id": 999999999,
@@ -82,6 +83,6 @@ def test_update_item_group():
 
 # Test DELETE item group by ID
 def test_delete_item_group():
-    item_group_id = 5  # Use an ID that exists in your item_groups.json
+    item_group_id = 999999999  # Use an ID that exists in your item_groups.json
     response = requests.delete(f"{BASE_URL}/item_groups/{item_group_id}", headers={"API_KEY":"a1b2c3d4e5"})
     assert response.status_code == 200  # 200 No Content indicates successful deletion
