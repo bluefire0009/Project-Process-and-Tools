@@ -85,7 +85,7 @@ def test_post_get_orders(connection: http.client.HTTPConnection, headers):
     body = post_order(connection, headers)
 
     # get the body just posted
-    connection.request('GET', f'/api/v1/orders/{body['id']}', headers=headers)
+    connection.request('GET', f"/api/v1/orders/{body['id']}", headers=headers)
 
     response = connection.getresponse()
     assert response.status == 200
@@ -107,11 +107,11 @@ def test_put_order(connection: http.client.HTTPConnection, headers):
     # adjust order and PUT it
     body['notes'] = 'changed_notes'
     json_body = json.dumps(body).encode('utf-8')
-    connection.request('PUT', f'/api/v1/orders/{body['id']}', headers=headers, body=json_body)
+    connection.request('PUT', f"/api/v1/orders/{body['id']}", headers=headers, body=json_body)
     connection.close()
 
     # GET adjusted order
-    connection.request('GET', f'/api/v1/orders/{body['id']}', headers=headers)
+    connection.request('GET', f"/api/v1/orders/{body['id']}", headers=headers)
 
     response = connection.getresponse()
     assert response.status == 200
@@ -131,7 +131,7 @@ def test_put_order(connection: http.client.HTTPConnection, headers):
 def test_get_order_items(connection: http.client.HTTPConnection, headers):
     body = post_order(connection, headers)
 
-    connection.request('GET', f'/api/v1/orders/{body['id']}/items', headers=headers)
+    connection.request('GET', f"/api/v1/orders/{body['id']}/items", headers=headers)
     response = connection.getresponse()
     assert response.status == 200
 

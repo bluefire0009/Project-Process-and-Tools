@@ -60,7 +60,7 @@ def test_post_get_location(connection: http.client.HTTPConnection, headers):
     body = post_location(connection, headers)
 
     # get the body just posted
-    connection.request('GET', f'/api/v1/locations/{body['id']}', headers=headers)
+    connection.request('GET', f"/api/v1/locations/{body['id']}", headers=headers)
 
     response = connection.getresponse()
     assert response.status == 200
@@ -84,12 +84,12 @@ def test_put_location(connection: http.client.HTTPConnection, headers):
     # adjust locaton and PUT it
     body['code'] = 'changed_code'
     json_body = json.dumps(body).encode('utf-8')
-    connection.request('PUT', f'/api/v1/locations/{body['id']}', headers=headers, body=json_body)
+    connection.request('PUT', f"/api/v1/locations/{body['id']}", headers=headers, body=json_body)
     connection.close()
 
     # GET adjusted location
     # get the body just posted
-    connection.request('GET', f'/api/v1/locations/{body['id']}', headers=headers)
+    connection.request('GET', f"/api/v1/locations/{body['id']}", headers=headers)
 
     response = connection.getresponse()
     assert response.status == 200
