@@ -3,33 +3,39 @@ import json
 import pytest
 
 
-headers = {'API_KEY': 'a1b2c3d4e5', 'Content-Type': 'application/json'}
+@pytest.fixture()
+def connection() -> http.client.HTTPConnection:
+    return http.client.HTTPConnection('localhost', 3000)
+
+
+@pytest.fixture()
+def headers():
+    return {'API_KEY': 'a1b2c3d4e5', 'Content-Type': 'application/json'}
+
 
 # not a test
-
-
-def delete_test_location(connection: http.client.HTTPConnection):
-    # delete location with "id": 99999
-    connection.request("DELETE", "/api/v1/locations/99999", headers=headers)
+def delete_test_location(connection: http.client.HTTPConnection, headers):
+    # delete location with 'id': 99999
+    connection.request('DELETE', '/api/v1/locations/99999', headers=headers)
     response = connection.getresponse()
     assert response.status == 200
     connection.close()
 
 
 # not a test
-def post_location(connection: http.client.HTTPConnection):
+def post_location(connection: http.client.HTTPConnection, headers):
     body = {
-        "id": 99999,
-        "warehouse_id": 99999,
-        "code": "test_code",
-        "name": "test_name",
-        "created_at": "",
-        "updated_at": ""
+        'id': 99999,
+        'warehouse_id': 99999,
+        'code': 'test_code',
+        'name': 'test_name',
+        'created_at': '',
+        'updated_at': ''
     }
     json_body = json.dumps(body).encode('utf-8')
 
     # post location
-    connection.request("POST", "/api/v1/locations/", headers=headers, body=json_body)
+    connection.request('POST', '/api/v1/locations/', headers=headers, body=json_body)
     # get response
     response = connection.getresponse()
     # assert that it has created
@@ -40,9 +46,8 @@ def post_location(connection: http.client.HTTPConnection):
     return body
 
 
-def test_get_all_locations():
-    connection = http.client.HTTPConnection('localhost', 3000)
-    connection.request("GET", "/api/v1/locations", headers=headers)
+def test_get_all_locations(connection: http.client.HTTPConnection, headers):
+    connection.request('GET', '/api/v1/locations', headers=headers)
 
     response = connection.getresponse()
     assert response.status == 200
@@ -51,12 +56,11 @@ def test_get_all_locations():
     connection.close()
 
 
-def test_post_get_location():
-    connection = http.client.HTTPConnection('localhost', 3000)
-    body = post_location(connection)
+def test_post_get_location(connection: http.client.HTTPConnection, headers):
+    body = post_location(connection, headers)
 
     # get the body just posted
-    connection.request("GET", f"/api/v1/locations/{body["id"]}", headers=headers)
+    connection.request('GET', f'/api/v1/locations/{body['id']}', headers=headers)
 
     response = connection.getresponse()
     assert response.status == 200
@@ -66,27 +70,26 @@ def test_post_get_location():
 
     location_dict = json.loads(data)
     assert len(location_dict) == 6
-    assert location_dict["id"] == body["id"]
-    assert location_dict["warehouse_id"] == body["warehouse_id"]
-    assert location_dict["code"] == body["code"]
-    assert location_dict["name"] == body["name"]
+    assert location_dict['id'] == body['id']
+    assert location_dict['warehouse_id'] == body['warehouse_id']
+    assert location_dict['code'] == body['code']
+    assert location_dict['name'] == body['name']
 
-    delete_test_location(connection)
+    delete_test_location(connection, headers)
 
 
-def test_put_location():
-    connection = http.client.HTTPConnection('localhost', 3000)
-    body = post_location(connection)
+def test_put_location(connection: http.client.HTTPConnection, headers):
+    body = post_location(connection, headers)
 
     # adjust locaton and PUT it
-    body["code"] = "changed_code"
+    body['code'] = 'changed_code'
     json_body = json.dumps(body).encode('utf-8')
-    connection.request("PUT", f"/api/v1/locations/{body["id"]}", headers=headers, body=json_body)
+    connection.request('PUT', f'/api/v1/locations/{body['id']}', headers=headers, body=json_body)
     connection.close()
 
     # GET adjusted location
     # get the body just posted
-    connection.request("GET", f"/api/v1/locations/{body["id"]}", headers=headers)
+    connection.request('GET', f'/api/v1/locations/{body['id']}', headers=headers)
 
     response = connection.getresponse()
     assert response.status == 200
@@ -96,18 +99,16 @@ def test_put_location():
 
     location_dict = json.loads(data)
     assert len(location_dict) == 6
-    assert location_dict["id"] == body["id"]
-    assert location_dict["warehouse_id"] == body["warehouse_id"]
-    assert location_dict["code"] == body["code"]
-    assert location_dict["name"] == body["name"]
+    assert location_dict['id'] == body['id']
+    assert location_dict['warehouse_id'] == body['warehouse_id']
+    assert location_dict['code'] == body['code']
+    assert location_dict['name'] == body['name']
 
-    delete_test_location(connection)
+    delete_test_location(connection, headers)
 
-def test_delete_location():
-    connection = http.client.HTTPConnection('localhost', 3000)
+
+def test_delete_location(connection: http.client.HTTPConnection, headers):
     # post location
-    body = post_location(connection)
+    body = post_location(connection, headers)
     # delte location
-    delete_test_location(connection)
-
-
+    delete_test_location(connection, headers)
