@@ -8,6 +8,7 @@ import json
 def _data():
     return "/api/v1", "a1b2c3d4e5"
 
+
 def test_get_all_item_lines(_data):
     url, key = _data
     connection = http.client.HTTPConnection('localhost', 3000)
@@ -17,6 +18,7 @@ def test_get_all_item_lines(_data):
     result = json.loads(data)
     assert response.status == 200
     assert isinstance(result, list)
+
 
 def test_get_item_line_by_id(_data):
     url, key = _data
@@ -39,22 +41,26 @@ def test_get_item_line_by_id(_data):
     connection.getresponse()
     time.sleep(5)
 
-    connection.request('GET', f"{url}/item_lines/999999", headers={"API_KEY": key})
+    connection.request(
+        'GET', f"{url}/item_lines/999999", headers={"API_KEY": key})
     response = connection.getresponse()
     data = response.read()
     result = json.loads(data)
 
-    connection.request('DELETE', f"{url}/item_lines/999999", headers={"API_KEY": key})
+    connection.request(
+        'DELETE', f"{url}/item_lines/999999", headers={"API_KEY": key})
 
     assert response.status == 200
     assert result["id"] == "999999"
     assert result["name"] == "Test Appliances"
     assert result["description"] == "test 123"
 
+
 def test_get_item_line_items(_data):
     url, key = _data
     connection = http.client.HTTPConnection('localhost', 3000)
-    connection.request('GET', f"{url}/item_lines/1/items", headers={"API_KEY": key})
+    connection.request(
+        'GET', f"{url}/item_lines/1/items", headers={"API_KEY": key})
     response = connection.getresponse()
     data = response.read()
     result = json.loads(data)
@@ -82,6 +88,7 @@ def test_get_item_line_items(_data):
         "updated_at": "2022-08-18 04:40:30"
     }
 
+
 def test_post_item_line(_data):
     url, key = _data
     connection = http.client.HTTPConnection('localhost', 3000)
@@ -102,9 +109,11 @@ def test_post_item_line(_data):
     time.sleep(1)
     response = connection.getresponse()
 
-    connection.request('DELETE', f"{url}/item_lines/999999", headers={"API_KEY": key})
+    connection.request(
+        'DELETE', f"{url}/item_lines/999999", headers={"API_KEY": key})
 
     assert response.status == 201
+
 
 def test_put_item_line(_data):
     url, key = _data
@@ -145,14 +154,17 @@ def test_put_item_line(_data):
 
     assert response.code == 200
 
-    connection.request('GET', f"{url}/item_lines/999999", headers={"API_KEY": key})
+    connection.request(
+        'GET', f"{url}/item_lines/999999", headers={"API_KEY": key})
     response = connection.getresponse()
     data = response.read()
     result = json.loads(data)
 
-    connection.request('DELETE', f"{url}/item_lines/999999", headers={"API_KEY": key})
+    connection.request(
+        'DELETE', f"{url}/item_lines/999999", headers={"API_KEY": key})
 
     assert result['description'] == "test12345"
+
 
 def test_delete_item_line(_data):
     url, key = _data
@@ -174,7 +186,8 @@ def test_delete_item_line(_data):
     response = connection.getresponse()
     assert response.code == 201, "insertion failed"
 
-    connection.request('DELETE', f"{url}/item_lines/999999", headers={"API_KEY": key})
+    connection.request(
+        'DELETE', f"{url}/item_lines/999999", headers={"API_KEY": key})
     response = connection.getresponse()
 
     assert response.code == 200
