@@ -163,7 +163,7 @@ def test_put_item_line(_data):
     connection.request(
         'DELETE', f"{url}/item_lines/999999", headers={"API_KEY": key})
 
-    assert result['description'] == "test12345"
+    assert result['description'] == "test 12345"
 
 
 def test_delete_item_line(_data):
