@@ -13,6 +13,43 @@ def _DataPytestFixture():
         'Content-Type': 'application/json'}   
     return _connection, _url, _testSuppliers, _headers
 
+def test_post_supplier(_DataPytestFixture):
+    # Arrange
+    _connection, _url, _testSuppliers, _headers = _DataPytestFixture
+
+    # Act
+    # Add the two test suppliers to the database
+    postStatuss = []
+    for supplier in _testSuppliers:
+        json_data = json.dumps(supplier).encode('utf-8')
+        _connection.request('POST',_url, body=json_data, headers=_headers)
+        response = _connection.getresponse()
+        postStatuss.append(response.status)
+        response.close()
+
+    # Send a GET request to the GET_ALL endpoint
+    _connection.request('GET', _url, headers=_headers)
+    response = _connection.getresponse()
+    data = response.read()
+    suppliers = json.loads(data)
+    
+    # list comprehension to get a list of all supplier id's
+    supplierIds = [s["id"] for s in suppliers]
+    
+    # Assert
+    assert len(suppliers) >= 2
+    for supplier in _testSuppliers:
+        assert supplier["id"] in supplierIds
+
+    for status in postStatuss:
+        assert status == 201
+
+    # Clean up
+    for supplier in _testSuppliers:
+        json_data = json.dumps(supplier).encode('utf-8')
+        _connection.request('DELETE',f'{_url}/{supplier["id"]}', headers=_headers)
+        _connection.getresponse().close()
+
 def test_get_all(_DataPytestFixture):
     # Arrange
     _connection, _url, _testSuppliers, _headers = _DataPytestFixture
