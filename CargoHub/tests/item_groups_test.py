@@ -53,7 +53,7 @@ def test_add_new_item_group_and_delete_new_item_group_afterwards(_DataPytestFixt
         "updated_at": "2023-01-01 12:00:00"
     }
     response = requests.post(
-        f"{url}/item-groups", json=new_item_group, headers={"API_KEY": api_key})
+        f"{url}/item_groups", json=new_item_group, headers={"API_KEY": api_key})
     assert response.status_code == 201
     data = response.json()
     assert data["id"] == 999999999
