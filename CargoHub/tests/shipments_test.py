@@ -13,7 +13,6 @@ def headers():
     return {'API_KEY': 'a1b2c3d4e5', 'Content-Type': 'application/json'}
 
 
-# not a test
 def delete_test_shipment(connection: http.client.HTTPConnection, headers):
     # delete shipment with 'id': 999999999
     connection.request('DELETE', '/api/v1/shipments/999999999', headers=headers)
@@ -22,7 +21,6 @@ def delete_test_shipment(connection: http.client.HTTPConnection, headers):
     connection.close()
 
 
-# not a test
 def post_test_shipment(connection: http.client.HTTPConnection, headers):
     body = {
         'id': 999999999,

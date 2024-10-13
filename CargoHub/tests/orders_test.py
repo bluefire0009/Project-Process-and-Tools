@@ -12,7 +12,6 @@ def connection() -> http.client.HTTPConnection:
 def headers():
     return {'API_KEY': 'a1b2c3d4e5', 'Content-Type': 'application/json'}
 
-# not a test
 
 
 def delete_test_order(connection: http.client.HTTPConnection, headers):
@@ -23,7 +22,6 @@ def delete_test_order(connection: http.client.HTTPConnection, headers):
     connection.close()
 
 
-# not a test
 def post_order(connection: http.client.HTTPConnection, headers):
     body = {
         'id': 99999,
@@ -123,6 +121,9 @@ def test_put_order(connection: http.client.HTTPConnection, headers):
     assert len(location_dict) == len(body)
     # loop trough response and original to check if they are the same
     for response_item, original in zip(location_dict, body):
+        # skip time created and updated since this is variable
+        if body["created_at"] == original or body["updated_at"] == original:
+            continue
         assert response_item == original
 
     delete_test_order(connection, headers)
