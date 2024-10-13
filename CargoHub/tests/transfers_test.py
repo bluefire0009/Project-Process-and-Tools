@@ -13,6 +13,42 @@ def _DataPytestFixture():
         'Content-Type': 'application/json'}   
     return _connection, _url, _testTransfers, _headers
 
+def test_post_transfer(_DataPytestFixture):
+    # Arrange
+    _connection, _url, _testTransfers, _headers = _DataPytestFixture
+
+    # Act
+    # Add the two test transfers to the database
+    postStatuss = []
+    for transfer in _testTransfers:
+        json_data = json.dumps(transfer).encode('utf-8')
+        _connection.request('POST',_url, body=json_data, headers=_headers)
+        response = _connection.getresponse()
+        postStatuss.append(response.status)
+        response.close()
+
+    # Send a GET request to the GET_ALL endpoint
+    _connection.request('GET', _url, headers=_headers)
+    response = _connection.getresponse()
+    data = response.read()
+    transfers = json.loads(data)
+    # list comprehension to get a list of all transfer id's
+    transferIds = [s["id"] for s in transfers]
+    
+    # Assert
+    assert len(transfers) >= 2
+    for transfer in _testTransfers:
+        assert transfer["id"] in transferIds
+    
+    for status in postStatuss:
+        assert status == 201
+
+    # Clean up
+    for transfer in _testTransfers:
+        json_data = json.dumps(transfer).encode('utf-8')
+        _connection.request('DELETE',f'{_url}/{transfer["id"]}', headers=_headers)
+        _connection.getresponse().close()
+
 def test_get_all(_DataPytestFixture):
     # Arrange
     _connection, _url, _testTransfers, _headers = _DataPytestFixture
@@ -25,8 +61,6 @@ def test_get_all(_DataPytestFixture):
     # Act
     # Send a GET request to the GET_ALL endpoint
     _connection.request('GET', _url, headers=_headers)
-
-    # Get the response
     response = _connection.getresponse()
     data = response.read()
     transfers = json.loads(data)
@@ -53,16 +87,11 @@ def test_get_one(_DataPytestFixture):
     for transfer in _testTransfers:
         json_data = json.dumps(transfer).encode('utf-8')
         _connection.request('POST',_url, body=json_data, headers=_headers)
-        _connection.getresponse().close()
-
-    # Add the test inventory
-    
+        _connection.getresponse().close()    
 
     # Act   
     # Send a GET request to the GET_SPECIFIC_TRANSFER endpoint
     _connection.request('GET', f'{_url}/{_testTransfers[0]["id"]}', headers=_headers)
-
-    # Get the response
     response = _connection.getresponse()
     data = response.read()
     transferAfter = json.loads(data)
@@ -95,8 +124,6 @@ def test_get_one_items(_DataPytestFixture):
     # Act
     # Send a GET request to the GET_SPECIFIC_TRANSFER endpoint
     _connection.request('GET', f'{_url}/{_testTransfers[0]["id"]}/items', headers=_headers)
-
-    # Get the response
     response = _connection.getresponse()
     data = response.read()
     itemsAfter = json.loads(data)
@@ -130,8 +157,6 @@ def test_put_transfer(_DataPytestFixture):
 
     # Send a GET request to the GET_SPECIFIC_TRANSFER endpoint
     _connection.request('GET', f'{_url}/{extraTransfer["id"]}', headers=_headers)
-
-    # Get the response
     response = _connection.getresponse()
     data = response.read()
     transferAfter = json.loads(data)
@@ -203,8 +228,6 @@ def test_delete_transfer(_DataPytestFixture):
 
     # Try getting the deleted transfer
     _connection.request('GET', f'{_url}/{_testTransfers[0]["id"]}', headers=_headers)
-
-    # Get the response
     response = _connection.getresponse()
     transferAfter = response.read()
     
