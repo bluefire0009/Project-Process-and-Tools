@@ -167,3 +167,21 @@ def test_delete_item_group_by_id(_DataPytestFixture):
     get_response = requests.get(
         f"{url}/item_groups/{item_group_id}", headers={"API_KEY": api_key})
     assert get_response.status_code == 404  # 404 Not Found confirms it was deleted
+
+
+def test_get_item_group_with_non_existent_id(_DataPytestFixture):
+    url, api_key = _DataPytestFixture
+    non_existent_item_group_id = 9999999999999  # An ID that does not exist in the database
+
+    # Make the GET request with a non-existent item_group_id
+    response = requests.get(f"{url}/item_groups/{non_existent_item_group_id}", headers={"API_KEY": api_key})
+
+    # Log the response content for debugging
+    print(response.text)
+
+    # Expecting a 200 status code
+    assert response.status_code == 200, f"Expected status code 200, got {response.status_code}"
+
+    # Check if the response is None
+    response_json = response.json()
+    assert response_json is None, "Expected response to be None for non-existent item groups"
