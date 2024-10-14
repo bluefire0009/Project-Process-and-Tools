@@ -15,13 +15,13 @@ def headers():
     return {'API_KEY': 'a1b2c3d4e5', 'Content-Type': 'application/json'}
 
 
-def delete_test_location(connection: http.client.HTTPConnection, headers):
+def delete_test_location(connection: http.client.HTTPConnection, headers, id=99999):
     # this test doesnt run standalone but is part of multiple tests
     # delete location with 'id': 99999
-    connection.request('DELETE', '/api/v1/locations/99999', headers=headers)
+    connection.request('DELETE', f'/api/v1/locations/{id}', headers=headers)
     response = connection.getresponse()
-    assert response.status == 200
     connection.close()
+    return response.status
 
 
 def get_posted_location(connection: http.client.HTTPConnection, headers, id: int):
@@ -29,11 +29,10 @@ def get_posted_location(connection: http.client.HTTPConnection, headers, id: int
     connection.request('GET', f"/api/v1/locations/{id}", headers=headers)
 
     response = connection.getresponse()
-    assert response.status == 200
 
     data = response.read()
     connection.close()
-    return json.loads(data)
+    return json.loads(data), response.status
 
 
 def post_location(connection: http.client.HTTPConnection, headers):
@@ -89,7 +88,7 @@ def test_post_get_location(connection: http.client.HTTPConnection, headers):
     assert location_dict['code'] == body['code']
     assert location_dict['name'] == body['name']
 
-    delete_test_location(connection, headers)
+    assert delete_test_location(connection, headers) == 200
 
 
 def test_put_location(connection: http.client.HTTPConnection, headers):
@@ -118,48 +117,63 @@ def test_put_location(connection: http.client.HTTPConnection, headers):
     assert location_dict['code'] == body['code']
     assert location_dict['name'] == body['name']
 
-    delete_test_location(connection, headers)
+    assert delete_test_location(connection, headers) == 200
 
 
 def test_delete_location(connection: http.client.HTTPConnection, headers):
     # post location
     body = post_location(connection, headers)
     # delte location
-    delete_test_location(connection, headers)
+    assert delete_test_location(connection, headers) == 200
 
 
-def assert_time_string_format(connection, headers, date_string):
+def test_delte_location_with_wrong_id(connection: http.client.HTTPConnection, headers):
+    # trying to delete something that doesnt exist should return 404 not found
+    assert delete_test_location(connection, headers, id=99999999999999999999999) == 404
+
+
+def test_get_with_wrong_id(connection: http.client.HTTPConnection, headers):
+    location_dict, status_code = get_posted_location(connection, headers, 9999999999999999999999999999999999999)
+    # trying to get something that doesnt exist should return 404 not found
+    assert status_code == 404
+
+
+def check_time_string_format(connection, headers, date_string):
     # this test will fail: the datimestring being written is in the wrong format
     try:
         # Attempt to parse with the expected format
+        # the correct format is taken from the existing objects in locations.json
         datetime.strptime(date_string, "%Y-%m-%d %H:%M:%S")
-    except ValueError as e:
+        return True
+    except BaseException:
         # if it breaks clean up the file
         delete_test_location(connection, headers)
-        raise AssertionError(f"Error: {str(e)}")
+        return False
 
 
 def test_created_at(connection: http.client.HTTPConnection, headers):
     # created at is empty in the body that gets posted
     body = post_location(connection, headers)
-    location_dict = get_posted_location(connection, headers, body['id'])
+    location_dict, status_code = get_posted_location(connection, headers, body['id'])
+    assert status_code == 200
 
     assert location_dict["created_at"] != ""
 
     # assert that the created at is in the right format
-    assert_time_string_format(connection, headers, location_dict["created_at"])
+    assert check_time_string_format(connection, headers, location_dict["created_at"]), f"Datetime fromat incorrect: {location_dict['created_at']}"
 
     # turn string into datetime obj
     read_date_obj = datetime.strptime(location_dict["created_at"], "%Y-%m-%d %H:%M:%S")
     current_time_obj = datetime.now()
 
+    # make sure time is accurate by minutes
     assert read_date_obj.year == current_time_obj.year
     assert read_date_obj.month == current_time_obj.month
     assert read_date_obj.day == current_time_obj.day
     assert read_date_obj.hour == current_time_obj.hour
     assert read_date_obj.minute == current_time_obj.minute
 
-    delete_test_location(connection, headers)
+    assert delete_test_location(connection, headers) == 200
 
 
 def test_updated_at(connection: http.client.HTTPConnection, headers):
@@ -175,16 +189,18 @@ def test_updated_at(connection: http.client.HTTPConnection, headers):
     connection.close()
 
     # get the location ad check if updated_at is empty
-    location_dict = get_posted_location(connection, headers, body['id'])
+    location_dict, status_code = get_posted_location(connection, headers, body['id'])
+    assert status_code == 200
     assert location_dict["updated_at"] != ""
 
     # assert that the created at is in the right format
-    assert_time_string_format(connection, headers, location_dict["updated_at"])
+    assert check_time_string_format(connection, headers, location_dict["updated_at"]), f"Datetime fromat incorrect: {location_dict['updated_at']}"
 
     # turn string into datetime obj
     read_date_obj = datetime.strptime(location_dict["updated_at"], "%Y-%m-%d %H:%M:%S")
     current_time_obj = datetime.now()
 
+    # make sure time is accurate by minutes
     assert read_date_obj.year == current_time_obj.year
     assert read_date_obj.month == current_time_obj.month
     assert read_date_obj.day == current_time_obj.day
