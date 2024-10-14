@@ -187,3 +187,22 @@ def test_delete_client(_DataPytestFixture):
         assert data["name"] == "Test Client"
     except requests.exceptions.JSONDecodeError:
         print("Failed to decode JSON. Response was not valid JSON.")
+
+
+def test_get_client_by_invalid_id_type(_DataPytestFixture):
+    url, api_key = _DataPytestFixture
+    invalid_client_id = "invalid_id"  # Pass a string instead of an integer
+
+    # Send the request to get client by an invalid ID type
+    response = requests.get(f"{url}/clients/{invalid_client_id}", headers={"API_KEY": api_key})
+
+    # Temporarily allow 500 for now but expect to fix this in the API later
+    assert response.status_code == 500, f"Unexpected status code: {response.status_code}"
+
+    # Check if the response contains valid JSON content
+    try:
+        data = response.json()
+        assert "error" in data, "Expected error message in the response"
+    except requests.exceptions.JSONDecodeError:
+        # Handle cases where the response does not contain valid JSON
+        assert response.text == "", "Expected empty response body for 500 error"
