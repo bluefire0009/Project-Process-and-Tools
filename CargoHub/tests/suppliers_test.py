@@ -259,14 +259,14 @@ def test_delete_supplier(_DataPytestFixture):
         _connection.request('DELETE',f'{_url}/{supplier["id"]}', headers=_headers)
         _connection.getresponse().close()
 
-def test_add_suuplier_wrong_format(_DataPytestFixture):
+def test_add_supplier_wrong_format(_DataPytestFixture):
     # Arrange  
     _connection, _url, _testSuppliers, _headers = _DataPytestFixture
     
     extraWrongSupplier = {"id": 1000003,"cude": "PUS0002","Sname": "Holden-Nuts","adress": "666 Christopher Roads","adress_extra": "Suite 069","citty": "Amberbusy","sip_code": "16905","brovince": "Illinose","cuntry": "Devil Martin","contact_Sname": "Caitlynn Vincent","bhonenumber": "666-733-291-8848x3542","breference": "H-PUS0002","created_at": "1995-12-18 03:05:46","updated_at": "2019-11-10 22:11:12"}    
     
     # Act
-    # Try adding the warehouse with the wrong format
+    # Try adding the supplier with the wrong format
     json_data = json.dumps(extraWrongSupplier).encode('utf-8')
     _connection.request('POST',_url, body=json_data, headers=_headers)
     response = _connection.getresponse()
@@ -277,9 +277,9 @@ def test_add_suuplier_wrong_format(_DataPytestFixture):
     _connection.request('GET', _url, headers=_headers)
     response = _connection.getresponse()
     data = response.read()
-    warehouses = json.loads(data)
-    # list comprehension to get a list of all warehouse id's
-    warehousesIds = [w["id"] for w in warehouses]
+    suppliers = json.loads(data)
+    # list comprehension to get a list of all supplier id's
+    suppliersIds = [w["id"] for w in suppliers]
 
     # Clean up
     _connection.request('DELETE',f'{_url}/{extraWrongSupplier["id"]}', headers=_headers)
@@ -287,20 +287,20 @@ def test_add_suuplier_wrong_format(_DataPytestFixture):
 
     # Assert
     assert postStatus == 400
-    assert extraWrongSupplier["id"] not in warehousesIds
+    assert extraWrongSupplier["id"] not in suppliersIds
 
 def test_put_supplier_wrong_format(_DataPytestFixture):
     # Arrange
     _connection, _url, _testSuppliers, _headers = _DataPytestFixture
     extraWrongSupplier = {"id": 1000003,"cude": "PUS0002","Sname": "Holden-Nuts","adress": "666 Christopher Roads","adress_extra": "Suite 069","citty": "Amberbusy","sip_code": "16905","brovince": "Illinose","cuntry": "Devil Martin","contact_Sname": "Caitlynn Vincent","bhonenumber": "666-733-291-8848x3542","breference": "H-PUS0002","created_at": "1995-12-18 03:05:46","updated_at": "2019-11-10 22:11:12"}
-    # Add the two test warehouses to the database
+    # Add the two test suppliers to the database
     for supplier in _testSuppliers:
         json_data = json.dumps(supplier).encode('utf-8')
         _connection.request('POST', f'{_url}', body=json_data, headers=_headers)
         _connection.getresponse().close()
 
     # Act
-    # Update the first test warehouse with the extraWarehouse
+    # Update the first test supplier with the extraWrongSupplier
     json_data = json.dumps(extraWrongSupplier).encode('utf-8')
     _connection.request('PUT',f'{_url}/{_testSuppliers[0]["id"]}', body=json_data, headers=_headers)
     response = _connection.getresponse()
@@ -311,9 +311,9 @@ def test_put_supplier_wrong_format(_DataPytestFixture):
     _connection.request('GET', _url, headers=_headers)
     response = _connection.getresponse()
     data = response.read()
-    warehouses = json.loads(data)
-    # list comprehension to get a list of all warehouse id's
-    warehousesIds = [w["id"] for w in warehouses]
+    suppliers = json.loads(data)
+    # list comprehension to get a list of all suppliers id's
+    supplierssIds = [w["id"] for w in suppliers]
     
     # Clean up
     _connection.request('DELETE',f'{_url}/{extraWrongSupplier["id"]}', headers=_headers)
@@ -325,4 +325,4 @@ def test_put_supplier_wrong_format(_DataPytestFixture):
 
     # Assert
     assert putStatusCode == 400
-    assert extraWrongSupplier["id"] not in warehousesIds
+    assert extraWrongSupplier["id"] not in supplierssIds
