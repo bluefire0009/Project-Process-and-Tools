@@ -1,6 +1,7 @@
 import pytest
 import requests
 
+
 @pytest.fixture
 def _DataPytestFixture():
     url = 'http://localhost:3000/api/v1'
@@ -8,6 +9,8 @@ def _DataPytestFixture():
     return url, api_key
 
 # Test GET all inventories
+
+
 def test_get_all_inventories(_DataPytestFixture):
     url, api_key = _DataPytestFixture
     response = requests.get(f"{url}/inventories", headers={"API_KEY": api_key})
@@ -23,10 +26,13 @@ def test_get_all_inventories(_DataPytestFixture):
         assert "updated_at" in inventory
 
 # Test GET inventory by ID
+
+
 def test_get_inventory_by_id(_DataPytestFixture):
     url, api_key = _DataPytestFixture
     inventory_id = 1  # Use an ID that exists in your inventories.json
-    response = requests.get(f"{url}/inventories/{inventory_id}", headers={"API_KEY": api_key})
+    response = requests.get(
+        f"{url}/inventories/{inventory_id}", headers={"API_KEY": api_key})
     assert response.status_code == 200
     inventory = response.json()
     assert inventory["id"] == inventory_id
@@ -37,6 +43,8 @@ def test_get_inventory_by_id(_DataPytestFixture):
     assert "updated_at" in inventory
 
 # Test ADD new inventory
+
+
 def test_add_new_inventory_and_delete_new_inventory_afterwards(_DataPytestFixture):
     url, api_key = _DataPytestFixture
     new_inventory = {
@@ -53,12 +61,13 @@ def test_add_new_inventory_and_delete_new_inventory_afterwards(_DataPytestFixtur
         "created_at": "2024-01-01 12:00:00",
         "updated_at": "2024-01-01 12:00:00"
     }
-    
-    response = requests.post(f"{url}/inventories", json=new_inventory, headers={"API_KEY": api_key})
-    
+
+    response = requests.post(
+        f"{url}/inventories", json=new_inventory, headers={"API_KEY": api_key})
+
     # Check the status code
     assert response.status_code == 201
-    
+
     # Check if response has a content and is JSON
     if response.text:
         try:
@@ -66,13 +75,15 @@ def test_add_new_inventory_and_delete_new_inventory_afterwards(_DataPytestFixtur
             assert data["id"] == 999999999
             assert data["item_id"] == "P999999"
         except ValueError:
-            pytest.fail(f"Response JSON could not be decoded. Response text: {response.text}")
+            pytest.fail(
+                f"Response JSON could not be decoded. Response text: {response.text}")
     else:
         # Handle the case where no response content is provided
         print("No response content returned.")
-    
+
     # Clean up: Delete the newly added inventory
-    response = requests.delete(f"{url}/inventories/{new_inventory['id']}", headers={"API_KEY": api_key})
+    response = requests.delete(
+        f"{url}/inventories/{new_inventory['id']}", headers={"API_KEY": api_key})
     assert response.status_code == 200  # 200 No Content indicates successful deletion
 
 
@@ -82,7 +93,8 @@ def test_update_inventory(_DataPytestFixture):
     inventory_id = 1  # Existing inventory ID
 
     # Retrieve original data to restore later
-    original_data = requests.get(f"{url}/inventories/{inventory_id}", headers={"API_KEY": api_key}).json()
+    original_data = requests.get(
+        f"{url}/inventories/{inventory_id}", headers={"API_KEY": api_key}).json()
 
     updated_inventory = {
         "id": inventory_id,
@@ -100,11 +112,13 @@ def test_update_inventory(_DataPytestFixture):
     }
 
     # Update the inventory using PUT request
-    put_response = requests.put(f"{url}/inventories/{inventory_id}", json=updated_inventory, headers={"API_KEY": api_key})
+    put_response = requests.put(
+        f"{url}/inventories/{inventory_id}", json=updated_inventory, headers={"API_KEY": api_key})
     assert put_response.status_code == 200
 
     # Now make a GET request to verify the update
-    get_response = requests.get(f"{url}/inventories/{inventory_id}", headers={"API_KEY": api_key})
+    get_response = requests.get(
+        f"{url}/inventories/{inventory_id}", headers={"API_KEY": api_key})
     assert get_response.status_code == 200
 
     # Check if the data was updated correctly
@@ -112,10 +126,13 @@ def test_update_inventory(_DataPytestFixture):
     assert data["description"] == "Updated Inventory Item"
 
     # Restore the original data
-    restore_response = requests.put(f"{url}/inventories/{inventory_id}", json=original_data, headers={"API_KEY": api_key})
+    restore_response = requests.put(
+        f"{url}/inventories/{inventory_id}", json=original_data, headers={"API_KEY": api_key})
     assert restore_response.status_code == 200
 
 # Test Delete inventory by ID
+
+
 def test_delete_inventory_item(_DataPytestFixture):
     url, api_key = _DataPytestFixture
     new_inventory = {
@@ -134,21 +151,26 @@ def test_delete_inventory_item(_DataPytestFixture):
     }
 
     # First, add the new inventory item
-    response = requests.post(f"{url}/inventories", json=new_inventory, headers={"API_KEY": api_key})
+    response = requests.post(
+        f"{url}/inventories", json=new_inventory, headers={"API_KEY": api_key})
     assert response.status_code == 201  # Check if creation was successful
 
     # Now, attempt to delete the inventory item
-    delete_response = requests.delete(f"{url}/inventories/{new_inventory['id']}", headers={"API_KEY": api_key})
-    
+    delete_response = requests.delete(
+        f"{url}/inventories/{new_inventory['id']}", headers={"API_KEY": api_key})
+
     # Check if the deletion was successful
-    assert delete_response.status_code == 200  # Expect a 200 OK response for successful deletion
+    # Expect a 200 OK response for successful deletion
+    assert delete_response.status_code == 200
+
 
 def test_get_inventory_by_id_with_invalid_id(_DataPytestFixture):
     url, api_key = _DataPytestFixture
     inventory_id = "invalid_id"  # Use a string to represent an invalid ID
 
     # Attempt to retrieve the inventory item with an invalid ID
-    response = requests.get(f"{url}/inventories/{inventory_id}", headers={"API_KEY": api_key})
+    response = requests.get(
+        f"{url}/inventories/{inventory_id}", headers={"API_KEY": api_key})
 
     # Log the response status code and message for debugging
     print(f"Response Status Code: {response.status_code}")
@@ -158,3 +180,35 @@ def test_get_inventory_by_id_with_invalid_id(_DataPytestFixture):
         print("Server error occurred. Please check the server logs.")
     else:
         assert response.status_code == 400  # Expect a 400 Bad Request response
+
+
+def test_get_inventory_by_id_with_empty_id(_DataPytestFixture):
+    url, api_key = _DataPytestFixture
+    empty_inventory_id = ""  # Use an empty string to represent an invalid ID
+
+    # Attempt to retrieve the inventory item with an empty ID
+    response = requests.get(f"{url}/inventories/{empty_inventory_id}", headers={"API_KEY": api_key})
+
+    # Log the response status code and message for debugging
+    print(f"Response Status Code: {response.status_code}")
+
+    # Check for a 400 Bad Request if the API is working correctly
+    if response.status_code == 500:
+        print("Server error occurred. Please check the server logs.")
+    else:
+        assert response.status_code == 400  # Expect a 400 Bad Request response
+
+
+def test_get_inventory_by_id_with_negative_id(_DataPytestFixture):
+    url, api_key = _DataPytestFixture
+    negative_inventory_id = -1  # Use a negative integer to represent an invalid ID
+
+    # Attempt to retrieve the inventory item with a negative ID
+    response = requests.get(f"{url}/inventories/{negative_inventory_id}", headers={"API_KEY": api_key})
+
+    # Log the response status code and body for debugging
+    print(f"Get Response Status Code: {response.status_code}")
+    print(f"Get Response Body: {response.text}")  # Log the response body for more context
+
+    # Check for a 400 Bad Request response
+    assert response.status_code == 400  # Expect a 400 Bad Request response for negative ID
