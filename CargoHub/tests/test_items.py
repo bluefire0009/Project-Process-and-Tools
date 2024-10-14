@@ -23,61 +23,32 @@ def test_get_all_items(_data):
 def test_get_item_by_id(_data):
     url, key = _data
     connection = http.client.HTTPConnection('localhost', 3000)
-
-    jsonData = json.dumps({
-        "uid": "P999999",
-        "code": "mYt79640E",
-        "description": "Down-sized system-worthy productivity",
-        "short_description": "pass",
-        "upc_code": "2541112620796",
-        "model_number": "ZK-417773-PXy",
-        "commodity_code": "z-761-L5A",
-        "item_line": 81,
-        "item_group": 83,
-        "item_type": 74,
-        "unit_purchase_quantity": 3,
-        "unit_order_quantity": 18,
-        "pack_order_quantity": 13,
-        "supplier_id": 10,
-        "supplier_code": "SUP468",
-        "supplier_part_number": "ZH-103509-MLv",
-        "created_at": "2024-10-06 02:30:31",
-        "updated_at": "2024-10-06 02:30:31"
-    })
-    connection.request(
-        "POST",
-        f"{url}/items",
-        headers={
-            "API_KEY": key,
-            "Content-Type": "application/json"},
-        body=jsonData)
-    connection.getresponse()
-    time.sleep(5)
-
-    connection.request('GET', f"{url}/items/P999999", headers={"API_KEY": key})
+    connection.request('GET', f"{url}/items/P000005", headers={"API_KEY": key})
     response = connection.getresponse()
     data = response.read()
     result = json.loads(data)
 
-    connection.request('DELETE', f"{url}/items/P999999", headers={"API_KEY": key})
-
     assert response.status == 200
-    assert result["uid"] == "P999999"
-    assert result["code"] == "mYt79640E"
-    assert result["description"] == "Down-sized system-worthy productivity"
-    assert result["short_description"] == "pass"
-    assert result["upc_code"] == "2541112620796"
-    assert result["model_number"] == "ZK-417773-PXy"
-    assert result["commodity_code"] == "z-761-L5A"
-    assert result["item_line"] == 81
-    assert result["item_group"] == 83
-    assert result["item_type"] == 74
-    assert result["unit_purchase_quantity"] == 3
-    assert result["unit_order_quantity"] == 18
-    assert result["pack_order_quantity"] == 13
-    assert result["supplier_id"] == 10
-    assert result["supplier_code"] == "SUP468"
-    assert result["supplier_part_number"] == "ZH-103509-MLv"
+    assert result == {
+        "uid": "P000005",
+        "code": "mHo61152n",
+        "description": "Stand-alone 24hour emulation",
+        "short_description": "there",
+        "upc_code": "0943113854446",
+        "model_number": "j-587-L3H",
+        "commodity_code": "67-vxkaB7P",
+        "item_line": 16,
+        "item_group": 50,
+        "item_type": 28,
+        "unit_purchase_quantity": 44,
+        "unit_order_quantity": 2,
+        "pack_order_quantity": 20,
+        "supplier_id": 35,
+        "supplier_code": "SUP347",
+        "supplier_part_number": "NzG-36a1",
+        "created_at": "2016-03-28 10:35:32",
+        "updated_at": "2024-05-20 22:42:05"
+    }
 
 
 def test_get_item_inventory(_data):
@@ -167,67 +138,38 @@ def test_post_item(_data):
     time.sleep(1)
     response = connection.getresponse()
 
-    connection.request('DELETE', f"{url}/items/P999999", headers={"API_KEY": key})
-
     assert response.status == 201
 
 
 def test_put_item(_data):
     url, key = _data
     connection = http.client.HTTPConnection('localhost', 3000)
-    jsonData = json.dumps({
-        "uid": "P999999",
-        "code": "mYt79640E",
-        "description": "Down-sized system-worthy productivity",
-        "short_description": "pass",
-        "upc_code": "2541112620796",
-        "model_number": "ZK-417773-PXy",
-        "commodity_code": "z-761-L5A",
-        "item_line": 81,
-        "item_group": 83,
-        "item_type": 74,
-        "unit_purchase_quantity": 3,
-        "unit_order_quantity": 18,
-        "pack_order_quantity": 13,
-        "supplier_id": 10,
-        "supplier_code": "SUP468",
-        "supplier_part_number": "ZH-103509-MLv",
-        "created_at": "2024-10-06 02:30:31",
-        "updated_at": "2024-10-06 02:30:31"
-    })
-    connection.request(
-        'POST',
-        f"{url}/items",
-        headers={
-            "API_KEY": key,
-            "Content-Type": "application/json"},
-        body=jsonData)
 
     jsonData = json.dumps({
-        "uid": "P999999",
-        "code": "mYt79640E",
+        "uid": "P000005",
+        "code": "mHo61152n",
         "description": "test123",
-        "short_description": "pass",
-        "upc_code": "2541112620796",
-        "model_number": "ZK-417773-PXy",
-        "commodity_code": "z-761-L5A",
-        "item_line": 81,
-        "item_group": 83,
-        "item_type": 74,
-        "unit_purchase_quantity": 3,
-        "unit_order_quantity": 18,
-        "pack_order_quantity": 13,
-        "supplier_id": 10,
-        "supplier_code": "SUP468",
-        "supplier_part_number": "ZH-103509-MLv",
-        "created_at": "2024-10-06 02:30:31",
-        "updated_at": "2024-10-06 02:30:31"
+        "short_description": "there",
+        "upc_code": "0943113854446",
+        "model_number": "j-587-L3H",
+        "commodity_code": "67-vxkaB7P",
+        "item_line": 16,
+        "item_group": 50,
+        "item_type": 28,
+        "unit_purchase_quantity": 44,
+        "unit_order_quantity": 2,
+        "pack_order_quantity": 20,
+        "supplier_id": 35,
+        "supplier_code": "SUP347",
+        "supplier_part_number": "NzG-36a1",
+        "created_at": "2016-03-28 10:35:32",
+        "updated_at": "2024-05-20 22:42:05"
     })
 
     connection = http.client.HTTPConnection('localhost', 3000)
     connection.request(
         'PUT',
-        f"{url}/items/P999999",
+        f"{url}/items/P000005",
         headers={
             "API_KEY": key,
             "Content-Type": "application/json"},
@@ -237,12 +179,40 @@ def test_put_item(_data):
 
     assert response.code == 200
 
-    connection.request('GET', f"{url}/items/P999999", headers={"API_KEY": key})
+    connection.request('GET', f"{url}/items/P000005", headers={"API_KEY": key})
     response = connection.getresponse()
     data = response.read()
     result = json.loads(data)
 
-    connection.request('DELETE', f"{url}/items/P999999", headers={"API_KEY": key})
+    jsonData = json.dumps({
+        "uid": "P000005",
+        "code": "mHo61152n",
+        "description": "Stand-alone 24hour emulation",
+        "short_description": "there",
+        "upc_code": "0943113854446",
+        "model_number": "j-587-L3H",
+        "commodity_code": "67-vxkaB7P",
+        "item_line": 16,
+        "item_group": 50,
+        "item_type": 28,
+        "unit_purchase_quantity": 44,
+        "unit_order_quantity": 2,
+        "pack_order_quantity": 20,
+        "supplier_id": 35,
+        "supplier_code": "SUP347",
+        "supplier_part_number": "NzG-36a1",
+        "created_at": "2016-03-28 10:35:32",
+        "updated_at": "2024-05-20 22:42:05"
+    })
+    connection.request(
+    'PUT',
+    f"{url}/items/P000005",
+    headers={
+        "API_KEY": key,
+        "Content-Type": "application/json"},
+    body=jsonData)
+    time.sleep(2)
+    response = connection.getresponse()
     assert result['description'] == "test123"
 
 
@@ -283,3 +253,30 @@ def test_delete_item(_data):
     response = connection.getresponse()
 
     assert response.code == 200
+
+
+def test_get_item_invalid_id(_data):
+    url, key = _data
+    connection = http.client.HTTPConnection('localhost', 3000)
+    connection.request('GET', f"{url}/items/invalidIdentification", headers={"API_KEY": key})
+    response = connection.getresponse()
+
+    assert response.status == 500
+
+def test_post_invalid_object(_data):
+    url, key = _data
+    connection = http.client.HTTPConnection('localhost', 3000)
+    jsonData = json.dumps({
+        "uid": "P9999999",
+    })
+    connection.request(
+        'POST',
+        f"{url}/items",
+        headers={
+            "API_KEY": key,
+            "Content-Type": "application/json"},
+        body=jsonData)
+    time.sleep(1)
+    response = connection.getresponse()
+
+    assert response.status == 201
