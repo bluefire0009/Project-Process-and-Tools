@@ -9,8 +9,6 @@ def _DataPytestFixture():
     return url, api_key
 
 # Test GET all item groups
-
-
 def test_get_all_item_groups(_DataPytestFixture):
     url, api_key = _DataPytestFixture
     response = requests.get(f"{url}/item_groups", headers={"API_KEY": api_key})
@@ -25,8 +23,6 @@ def test_get_all_item_groups(_DataPytestFixture):
         assert "updated_at" in item_group
 
 # Test GET item group by ID
-
-
 def test_get_item_group_by_id(_DataPytestFixture):
     url, api_key = _DataPytestFixture
     item_group_id = 2  # Use an ID that exists in your item_groups.json
@@ -40,9 +36,47 @@ def test_get_item_group_by_id(_DataPytestFixture):
     assert "created_at" in item_group
     assert "updated_at" in item_group
 
+
+# Test GET items by item group id
+def test_get_items_by_item_group_id(_DataPytestFixture):
+    url, api_key = _DataPytestFixture
+    item_group_id = 73
+    
+    # Make the GET request to fetch items for a specific item group
+    response = requests.get(f"{url}/item_groups/{item_group_id}/items", headers={"API_KEY": api_key})
+    
+    # Ensure the request was successful
+    assert response.status_code == 200, f"Expected status code 200, got {response.status_code}"
+    
+    # Parse the response JSON
+    data = response.json()
+    
+    # Ensure the data is a list
+    assert isinstance(data, list), "Expected a list of items"
+    
+    # Check each item in the list
+    for item in data:
+        assert "uid" in item
+        assert "code" in item
+        assert "description" in item
+        assert "short_description" in item
+        assert "upc_code" in item
+        assert "model_number" in item
+        assert "commodity_code" in item
+        assert "item_line" in item
+        assert "item_group" in item
+        assert item["item_group"] == item_group_id  # Ensure the item belongs to the correct group
+        assert "item_type" in item
+        assert "unit_purchase_quantity" in item
+        assert "unit_order_quantity" in item
+        assert "pack_order_quantity" in item
+        assert "supplier_id" in item
+        assert "supplier_code" in item
+        assert "supplier_part_number" in item
+        assert "created_at" in item
+        assert "updated_at" in item
+
 # Test ADD new item group (currently no POST endpoint available)
-
-
 def test_add_new_item_group_and_delete_new_item_group_afterwards(_DataPytestFixture):
     url, api_key = _DataPytestFixture
     new_item_group = {
@@ -65,8 +99,6 @@ def test_add_new_item_group_and_delete_new_item_group_afterwards(_DataPytestFixt
     assert response.status_code == 200  # 200 No Content indicates successful deletion
 
 # Test PUT update item group
-
-
 def test_update_item_group(_DataPytestFixture):
     url, api_key = _DataPytestFixture
     item_group_id = 99
@@ -108,8 +140,6 @@ def test_update_item_group(_DataPytestFixture):
     assert restore_response.status_code == 200
 
 # Test DELETE item group by ID
-
-
 def test_delete_item_group_by_id(_DataPytestFixture):
     url, api_key = _DataPytestFixture
     new_item_group = {
