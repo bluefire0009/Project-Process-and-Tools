@@ -49,6 +49,49 @@ def test_get_client_by_id(_DataPytestFixture):
     assert "created_at" in client
     assert "updated_at" in client
 
+
+# Test GET orders by client id
+def test_get_orders_for_client(_DataPytestFixture):
+    url, api_key = _DataPytestFixture
+    client_id = 1  # Use a valid client ID from your clients.json file
+    
+    # Send the request to get all orders for the specific client
+    response = requests.get(f"{url}/clients/{client_id}/orders", headers={"API_KEY": api_key})
+    
+    # Assert the status code is 200 (OK)
+    assert response.status_code == 200
+    
+    # Parse the response data
+    data = response.json()
+    
+    # Assert that the response is a list of orders
+    assert isinstance(data, list)
+    
+    # Assert that each order contains the expected fields
+    for order in data:
+        assert "id" in order
+        assert "source_id" in order
+        assert "order_date" in order
+        assert "request_date" in order
+        assert "reference" in order
+        assert "order_status" in order
+        assert "warehouse_id" in order
+        assert "total_amount" in order
+        assert "total_discount" in order
+        assert "total_tax" in order
+        assert "total_surcharge" in order
+        assert "created_at" in order
+        assert "updated_at" in order
+        
+        # Assert that each order has items
+        assert "items" in order
+        assert isinstance(order["items"], list)
+        
+        # Check that each item has required fields
+        for item in order["items"]:
+            assert "item_id" in item
+            assert "amount" in item
+
 # Test Add client
 def test_add_new_client_and_delete_new_client_afterwards(_DataPytestFixture):
     url, api_key = _DataPytestFixture
