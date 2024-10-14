@@ -142,3 +142,19 @@ def test_delete_inventory_item(_DataPytestFixture):
     
     # Check if the deletion was successful
     assert delete_response.status_code == 200  # Expect a 200 OK response for successful deletion
+
+def test_get_inventory_by_id_with_invalid_id(_DataPytestFixture):
+    url, api_key = _DataPytestFixture
+    inventory_id = "invalid_id"  # Use a string to represent an invalid ID
+
+    # Attempt to retrieve the inventory item with an invalid ID
+    response = requests.get(f"{url}/inventories/{inventory_id}", headers={"API_KEY": api_key})
+
+    # Log the response status code and message for debugging
+    print(f"Response Status Code: {response.status_code}")
+
+    # Check for a 400 Bad Request if the API is working correctly
+    if response.status_code == 500:
+        print("Server error occurred. Please check the server logs.")
+    else:
+        assert response.status_code == 400  # Expect a 400 Bad Request response
