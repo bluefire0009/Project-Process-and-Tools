@@ -241,3 +241,71 @@ def test_delete_transfer(_DataPytestFixture):
         json_data = json.dumps(transfer).encode('utf-8')
         _connection.request('DELETE',f'{_url}/{transfer["id"]}', headers=_headers)
         _connection.getresponse().close()
+
+def test_add_transfer_wrong_format(_DataPytestFixture):
+    # Arrange  
+    _connection, _url, _testTransfers, _headers = _DataPytestFixture
+    
+    extraWrongTransfer = {"id": 100000003, "refference": "TR00001", "tlansfer_from": None, "tlansfer_to": 9229, "tlansfer_status": "Scheduled", "created_at": "2000-03-11T13:11:14Z", "updated_at": "2000-03-12T16:11:14Z", "idems": [{"idem_id": "P007666", "amound": 69}]}    
+    
+    # Act
+    # Try adding the transfer with the wrong format
+    json_data = json.dumps(extraWrongTransfer).encode('utf-8')
+    _connection.request('POST',_url, body=json_data, headers=_headers)
+    response = _connection.getresponse()
+    postStatus = response.status
+    response.close()
+
+    # Send a GET request to the GET_ALL endpoint
+    _connection.request('GET', _url, headers=_headers)
+    response = _connection.getresponse()
+    data = response.read()
+    transfers = json.loads(data)
+    # list comprehension to get a list of all transfer id's
+    transfersIds = [t["id"] for t in transfers]
+
+    # Clean up
+    _connection.request('DELETE',f'{_url}/{extraWrongTransfer["id"]}', headers=_headers)
+    _connection.getresponse().close()
+
+    # Assert
+    assert postStatus == 400
+    assert extraWrongTransfer["id"] not in transfersIds
+
+def test_put_transfer_wrong_format(_DataPytestFixture):
+    # Arrange
+    _connection, _url, _testTransfers, _headers = _DataPytestFixture
+    extraWrongTransfer = {"id": 100000003, "refference": "TR00001", "tlansfer_from": None, "tlansfer_to": 9229, "tlansfer_status": "Scheduled", "created_at": "2000-03-11T13:11:14Z", "updated_at": "2000-03-12T16:11:14Z", "idems": [{"idem_id": "P007666", "amound": 69}]}
+    # Add the two test transfer to the database
+    for transfer in _testTransfers:
+        json_data = json.dumps(transfer).encode('utf-8')
+        _connection.request('POST', f'{_url}', body=json_data, headers=_headers)
+        _connection.getresponse().close()
+
+    # Act
+    # Update the first test transfer with the extraWrongTransfer
+    json_data = json.dumps(extraWrongTransfer).encode('utf-8')
+    _connection.request('PUT',f'{_url}/{_testTransfers[0]["id"]}', body=json_data, headers=_headers)
+    response = _connection.getresponse()
+    putStatusCode = response.status
+    response.close()
+
+    # Send a GET request to the GET_ALL endpoint
+    _connection.request('GET', _url, headers=_headers)
+    response = _connection.getresponse()
+    data = response.read()
+    transfers = json.loads(data)
+    # list comprehension to get a list of all transfer id's
+    transfersIds = [w["id"] for w in transfers]
+    
+    # Clean up
+    _connection.request('DELETE',f'{_url}/{extraWrongTransfer["id"]}', headers=_headers)
+    _connection.getresponse().close()
+    for transfer in _testTransfers:
+        json_data = json.dumps(transfer).encode('utf-8')
+        _connection.request('DELETE',f'{_url}/{transfer["id"]}', headers=_headers)
+        _connection.getresponse().close()
+
+    # Assert
+    assert putStatusCode == 400
+    assert extraWrongTransfer["id"] not in transfersIds
