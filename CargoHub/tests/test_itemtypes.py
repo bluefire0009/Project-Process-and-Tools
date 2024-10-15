@@ -6,11 +6,11 @@ import json
 
 @pytest.fixture
 def _data():
-    return "/api/v1", "a1b2c3d4e5"
+    return http.client.HTTPConnection('localhost', 3000), "/api/v1", "a1b2c3d4e5"
+
 
 def test_get_all_item_lines(_data):
-    url, key = _data
-    connection = http.client.HTTPConnection('localhost', 3000)
+    connection, url, key = _data
     connection.request('GET', f"{url}/item_types", headers={"API_KEY": key})
     response = connection.getresponse()
     data = response.read()
@@ -20,8 +20,7 @@ def test_get_all_item_lines(_data):
 
 
 def test_get_item_types_by_id(_data):
-    url, key = _data
-    connection = http.client.HTTPConnection('localhost', 3000)
+    connection, url, key = _data
 
     connection.request(
         'GET', f"{url}/item_types/5", headers={"API_KEY": key})
@@ -31,17 +30,16 @@ def test_get_item_types_by_id(_data):
 
     assert response.status == 200
     assert result == {
-    "id": 5,
-    "name": "Headphones",
-    "description": "",
-    "created_at": "1995-07-05 08:05:05",
-    "updated_at": "2010-02-04 10:11:54"
+        "id": 5,
+        "name": "Headphones",
+        "description": "",
+        "created_at": "1995-07-05 08:05:05",
+        "updated_at": "2010-02-04 10:11:54"
     }
 
 
 def test_get_item_type_items(_data):
-    url, key = _data
-    connection = http.client.HTTPConnection('localhost', 3000)
+    connection, url, key = _data
     connection.request(
         'GET', f"{url}/item_types/1/items", headers={"API_KEY": key})
     response = connection.getresponse()
@@ -73,8 +71,7 @@ def test_get_item_type_items(_data):
 
 
 def test_post_item_type(_data):
-    url, key = _data
-    connection = http.client.HTTPConnection('localhost', 3000)
+    connection, url, key = _data
     jsonData = json.dumps({
         "id": 999999,
         "name": "Desktop",
@@ -96,15 +93,14 @@ def test_post_item_type(_data):
 
 
 def test_put_item_types(_data):
-    url, key = _data
-    connection = http.client.HTTPConnection('localhost', 3000)
+    connection, url, key = _data
 
     jsonData = json.dumps({
-    "id": 5,
-    "name": "Headphones",
-    "description": "test123",
-    "created_at": "1995-07-05 08:05:05",
-    "updated_at": "2010-02-04 10:11:54"
+        "id": 5,
+        "name": "Headphones",
+        "description": "test123",
+        "created_at": "1995-07-05 08:05:05",
+        "updated_at": "2010-02-04 10:11:54"
     })
 
     connection = http.client.HTTPConnection('localhost', 3000)
@@ -126,13 +122,11 @@ def test_put_item_types(_data):
     data = response.read()
     result = json.loads(data)
 
-
     assert result['description'] == "test123"
 
 
 def test_delete_item_type(_data):
-    url, key = _data
-    connection = http.client.HTTPConnection('localhost', 3000)
+    connection, url, key = _data
 
     connection.request(
         'DELETE', f"{url}/item_types/999999", headers={"API_KEY": key})
@@ -140,17 +134,17 @@ def test_delete_item_type(_data):
 
     assert response.code == 200
 
+
 def test_get_item_type_invalid_id(_data):
-    url, key = _data
-    connection = http.client.HTTPConnection('localhost', 3000)
+    connection, url, key = _data
     connection.request('GET', f"{url}/item_types/invalidIdentification", headers={"API_KEY": key})
     response = connection.getresponse()
 
     assert response.status == 500
 
+
 def test_post_invalid_object(_data):
-    url, key = _data
-    connection = http.client.HTTPConnection('localhost', 3000)
+    connection, url, key = _data
     jsonData = json.dumps({
         "id": "99999999",
     })
