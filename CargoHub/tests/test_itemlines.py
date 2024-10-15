@@ -11,31 +11,75 @@ def _data():
 
 def test_get_all_item_lines(_data):
     connection, url, key = _data
+
+    test_data = {
+        "id": 999999,
+        "name": "Test Appliances",
+        "description": "test 123",
+        "created_at": "1979-01-16 07:07:50",
+        "updated_at": "2024-01-05 23:53:25"
+    }
+    jsonData = json.dumps(test_data)
+    connection.request(
+        'POST',
+        f"{url}/item_lines",
+        headers={
+            "API_KEY": key,
+            "Content-Type": "application/json"},
+        body=jsonData)
+    post_response = connection.getresponse()
+    assert post_response.code == 201, "insertion failed"
+
     connection.request('GET', f"{url}/item_lines", headers={"API_KEY": key})
     response = connection.getresponse()
     data = response.read()
     result = json.loads(data)
+    resultIds = [w["id"] for w in result]
+
+    connection.request('DELETE', f"{url}/item_lines/999999", headers={"API_KEY": key})
+    delete_response = connection.getresponse()
+    assert delete_response.status == 200
+
     assert response.status == 200
     assert isinstance(result, list)
+    assert test_data["id"] in resultIds
 
 
 def test_get_item_line_by_id(_data):
     connection, url, key = _data
 
+    test_data = {
+        "id": 999999,
+        "name": "Test Appliances",
+        "description": "test 123",
+        "created_at": "1979-01-16 07:07:50",
+        "updated_at": "2024-01-05 23:53:25"
+    }
+    jsonData = json.dumps(test_data)
     connection.request(
-        'GET', f"{url}/item_lines/5", headers={"API_KEY": key})
+        'POST',
+        f"{url}/item_lines",
+        headers={
+            "API_KEY": key,
+            "Content-Type": "application/json"},
+        body=jsonData)
+    post_response = connection.getresponse()
+    assert post_response.code == 201, "insertion failed"
+
+    connection.request(
+        'GET', f"{url}/item_lines/999999", headers={"API_KEY": key})
     response = connection.getresponse()
     data = response.read()
     result = json.loads(data)
 
+    connection.request('DELETE', f"{url}/item_lines/999999", headers={"API_KEY": key})
+    delete_response = connection.getresponse()
+    assert delete_response.status == 200
+
     assert response.status == 200
-    assert result == {
-        "id": 5,
-        "name": "Accessories",
-        "description": "",
-        "created_at": "2015-01-22 15:52:45",
-        "updated_at": "2018-02-04 11:31:03"
-    }
+    assert result["id"] == test_data["id"]
+    assert result["name"] == test_data["name"]
+    assert result["description"] == test_data["description"]
 
 
 def test_get_item_line_items(_data):
@@ -72,13 +116,15 @@ def test_get_item_line_items(_data):
 
 def test_post_item_line(_data):
     connection, url, key = _data
-    jsonData = json.dumps({
+
+    test_data = {
         "id": 999999,
         "name": "Test Appliances",
         "description": "test 123",
         "created_at": "1979-01-16 07:07:50",
         "updated_at": "2024-01-05 23:53:25"
-    })
+    }
+    jsonData = json.dumps(test_data)
     connection.request(
         'POST',
         f"{url}/item_lines",
@@ -87,28 +133,61 @@ def test_post_item_line(_data):
             "Content-Type": "application/json"},
         body=jsonData)
     time.sleep(1)
-    response = connection.getresponse()
+    post_response = connection.getresponse()
+
+    connection.request(
+        'GET', f"{url}/item_lines/999999", headers={"API_KEY": key})
+    get_response = connection.getresponse()
+    get_data = get_response.read()
+    get_result = json.loads(get_data)
+
+    connection.request('GET', f"{url}/item_lines", headers={"API_KEY": key})
+    get_all_response = connection.getresponse()
+    get_all_data = get_all_response.read()
+    get_all_result = json.loads(get_all_data)
+    get_all_resultIds = [w["id"] for w in get_all_result]
 
     connection.request(
         'DELETE', f"{url}/item_lines/999999", headers={"API_KEY": key})
 
-    assert response.status == 201
+    assert post_response.status == 201
+    assert test_data["id"] in get_all_resultIds
+    assert get_result["id"] == test_data["id"]
+    assert get_result["name"] == test_data["name"]
+    assert get_result["description"] == test_data["description"]
 
 
 def test_put_item_line(_data):
     connection, url, key = _data
 
-    jsonData = json.dumps({
-        "id": 5,
-        "name": "Accessories",
-        "description": "test123",
-        "created_at": "2015-01-22 15:52:45",
-        "updated_at": "2018-02-04 11:31:03"
-    })
+    test_data = {
+        "id": 999999,
+        "name": "Test Appliances",
+        "description": "test 123",
+        "created_at": "1979-01-16 07:07:50",
+        "updated_at": "2024-01-05 23:53:25"
+    }
+    jsonData = json.dumps(test_data)
+    connection.request(
+        'POST',
+        f"{url}/item_lines",
+        headers={
+            "API_KEY": key,
+            "Content-Type": "application/json"},
+        body=jsonData)
+    
+    test_updated_data = {
+        "id": 999999,
+        "name": "Test Appliances",
+        "description": "test 12345",
+        "created_at": "1979-01-16 07:07:50",
+        "updated_at": "2024-01-05 23:53:25"
+    }
+    jsonData = json.dumps(test_updated_data)
 
     connection.request(
         'PUT',
-        f"{url}/item_lines/5",
+        f"{url}/item_lines/999999",
         headers={
             "API_KEY": key,
             "Content-Type": "application/json"},
@@ -119,30 +198,17 @@ def test_put_item_line(_data):
     assert response.code == 200
 
     connection.request(
-        'GET', f"{url}/item_lines/5", headers={"API_KEY": key})
+        'GET', f"{url}/item_lines/999999", headers={"API_KEY": key})
     response = connection.getresponse()
     data = response.read()
     result = json.loads(data)
 
-    jsonData = json.dumps({
-        "id": 5,
-        "name": "Accessories",
-        "description": "",
-        "created_at": "2015-01-22 15:52:45",
-        "updated_at": "2018-02-04 11:31:03"
-    })
-
     connection.request(
-        'PUT',
-        f"{url}/item_lines/5",
-        headers={
-            "API_KEY": key,
-            "Content-Type": "application/json"},
-        body=jsonData)
-    time.sleep(2)
-    response = connection.getresponse()
+        'DELETE', f"{url}/item_lines/999999", headers={"API_KEY": key})
 
-    assert result['description'] == "test123"
+    assert result["id"] == test_updated_data["id"]
+    assert result["name"] == test_updated_data["name"]
+    assert result["description"] == test_updated_data["description"]
 
 
 def test_delete_item_line(_data):
@@ -164,11 +230,18 @@ def test_delete_item_line(_data):
     response = connection.getresponse()
     assert response.code == 201, "insertion failed"
 
-    connection.request(
-        'DELETE', f"{url}/item_lines/999999", headers={"API_KEY": key})
+    connection.request('DELETE', f"{url}/item_lines/999999", headers={"API_KEY": key})
     response = connection.getresponse()
 
+    connection.request(
+        'GET', f"{url}/item_lines/999999", headers={"API_KEY": key})
+    get_response = connection.getresponse()
+    get_data = get_response.read()
+    get_result = json.loads(get_data)
+
+
     assert response.code == 200
+    assert get_result == None
 
 
 def test_get_item_line_invalid_id(_data):

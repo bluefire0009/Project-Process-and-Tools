@@ -11,42 +11,115 @@ def _data():
 
 def test_get_all_items(_data):
     connection, url, key = _data
+
+    test_data = {
+        "uid": "P999999",
+        "code": "mYt79640E",
+        "description": "Down-sized system-worthy productivity",
+        "short_description": "pass",
+        "upc_code": "2541112620796",
+        "model_number": "ZK-417773-PXy",
+        "commodity_code": "z-761-L5A",
+        "item_line": 81,
+        "item_group": 83,
+        "item_type": 74,
+        "unit_purchase_quantity": 3,
+        "unit_order_quantity": 18,
+        "pack_order_quantity": 13,
+        "supplier_id": 10,
+        "supplier_code": "SUP468",
+        "supplier_part_number": "ZH-103509-MLv",
+        "created_at": "2024-10-06 02:30:31",
+        "updated_at": "2024-10-06 02:30:31"
+    }
+    jsonData = json.dumps(test_data)
+    connection.request(
+        'POST',
+        f"{url}/items",
+        headers={
+            "API_KEY": key,
+            "Content-Type": "application/json"},
+        body=jsonData)
+    post_response = connection.getresponse()
+    assert post_response.code == 201, "insertion failed"
+
     connection.request('GET', f"{url}/items", headers={"API_KEY": key})
     response = connection.getresponse()
     data = response.read()
     result = json.loads(data)
+
+    connection.request('DELETE', f"{url}/items/P999999", headers={"API_KEY": key})
+    delete_response = connection.getresponse()
+    assert delete_response.status == 200, "delete failed"
+
+    resultIds = [w["uid"] for w in result]
+
     assert response.status == 200
     assert isinstance(result, list)
+    assert len(result) > 0
+    assert test_data["uid"] in resultIds
 
 
 def test_get_item_by_id(_data):
     connection, url, key = _data
-    connection.request('GET', f"{url}/items/P000005", headers={"API_KEY": key})
+    
+    test_data = {
+        "uid": "P999999",
+        "code": "mYt79640E",
+        "description": "Down-sized system-worthy productivity",
+        "short_description": "pass",
+        "upc_code": "2541112620796",
+        "model_number": "ZK-417773-PXy",
+        "commodity_code": "z-761-L5A",
+        "item_line": 81,
+        "item_group": 83,
+        "item_type": 74,
+        "unit_purchase_quantity": 3,
+        "unit_order_quantity": 18,
+        "pack_order_quantity": 13,
+        "supplier_id": 10,
+        "supplier_code": "SUP468",
+        "supplier_part_number": "ZH-103509-MLv",
+        "created_at": "2024-10-06 02:30:31",
+        "updated_at": "2024-10-06 02:30:31"
+    }
+    jsonData = json.dumps(test_data)
+    connection.request(
+        'POST',
+        f"{url}/items",
+        headers={
+            "API_KEY": key,
+            "Content-Type": "application/json"},
+        body=jsonData)
+    post_response = connection.getresponse()
+    assert post_response.code == 201, "insertion failed"
+
+    connection.request('GET', f"{url}/items/P999999", headers={"API_KEY": key})
     response = connection.getresponse()
     data = response.read()
     result = json.loads(data)
 
+    connection.request('DELETE', f"{url}/items/P999999", headers={"API_KEY": key})
+    delete_response = connection.getresponse()
+    assert delete_response.status == 200, "delete failed"
+
     assert response.status == 200
-    assert result == {
-        "uid": "P000005",
-        "code": "mHo61152n",
-        "description": "Stand-alone 24hour emulation",
-        "short_description": "there",
-        "upc_code": "0943113854446",
-        "model_number": "j-587-L3H",
-        "commodity_code": "67-vxkaB7P",
-        "item_line": 16,
-        "item_group": 50,
-        "item_type": 28,
-        "unit_purchase_quantity": 44,
-        "unit_order_quantity": 2,
-        "pack_order_quantity": 20,
-        "supplier_id": 35,
-        "supplier_code": "SUP347",
-        "supplier_part_number": "NzG-36a1",
-        "created_at": "2016-03-28 10:35:32",
-        "updated_at": "2024-05-20 22:42:05"
-    }
+    assert result["uid"] == test_data["uid"] 
+    assert result["code"] == test_data["code"] 
+    assert result["description"] == test_data["description"] 
+    assert result["short_description"] == test_data["short_description"] 
+    assert result["upc_code"] == test_data["upc_code"] 
+    assert result["model_number"] == test_data["model_number"] 
+    assert result["commodity_code"] == test_data["commodity_code"] 
+    assert result["item_line"] == test_data["item_line"] 
+    assert result["item_group"] == test_data["item_group"] 
+    assert result["item_type"] == test_data["item_type"] 
+    assert result["unit_purchase_quantity"] == test_data["unit_purchase_quantity"] 
+    assert result["unit_order_quantity"] == test_data["unit_order_quantity"] 
+    assert result["pack_order_quantity"] == test_data["pack_order_quantity"] 
+    assert result["supplier_id"] == test_data["supplier_id"] 
+    assert result["supplier_code"] == test_data["supplier_code"] 
+    assert result["supplier_part_number"] == test_data["supplier_part_number"] 
 
 
 def test_get_item_inventory(_data):
@@ -103,7 +176,7 @@ def test_get_item_inventory_totals(_data):
 
 def test_post_item(_data):
     connection, url, key = _data
-    jsonData = json.dumps({
+    test_data = {
         "uid": "P999999",
         "code": "mYt79640E",
         "description": "Down-sized system-worthy productivity",
@@ -122,7 +195,8 @@ def test_post_item(_data):
         "supplier_part_number": "ZH-103509-MLv",
         "created_at": "2024-10-06 02:30:31",
         "updated_at": "2024-10-06 02:30:31"
-    })
+    }
+    jsonData = json.dumps(test_data)
     connection.request(
         'POST',
         f"{url}/items",
@@ -133,80 +207,129 @@ def test_post_item(_data):
     time.sleep(1)
     response = connection.getresponse()
 
+    
+    connection.request('GET', f"{url}/items/P999999", headers={"API_KEY": key})
+    get_response = connection.getresponse()
+    get_data = get_response.read()
+    get_result = json.loads(get_data)
+
+    
+    connection.request('DELETE', f"{url}/items/P999999", headers={"API_KEY": key})
+    delete_response = connection.getresponse()
+    assert delete_response.status == 200, "delete failed"
+
     assert response.status == 201
+    assert get_result["uid"] == test_data["uid"] 
+    assert get_result["code"] == test_data["code"] 
+    assert get_result["description"] == test_data["description"] 
+    assert get_result["short_description"] == test_data["short_description"] 
+    assert get_result["upc_code"] == test_data["upc_code"] 
+    assert get_result["model_number"] == test_data["model_number"] 
+    assert get_result["commodity_code"] == test_data["commodity_code"] 
+    assert get_result["item_line"] == test_data["item_line"] 
+    assert get_result["item_group"] == test_data["item_group"] 
+    assert get_result["item_type"] == test_data["item_type"] 
+    assert get_result["unit_purchase_quantity"] == test_data["unit_purchase_quantity"] 
+    assert get_result["unit_order_quantity"] == test_data["unit_order_quantity"] 
+    assert get_result["pack_order_quantity"] == test_data["pack_order_quantity"] 
+    assert get_result["supplier_id"] == test_data["supplier_id"] 
+    assert get_result["supplier_code"] == test_data["supplier_code"] 
+    assert get_result["supplier_part_number"] == test_data["supplier_part_number"] 
 
 
 def test_put_item(_data):
     connection, url, key = _data
 
-    jsonData = json.dumps({
-        "uid": "P000005",
-        "code": "mHo61152n",
-        "description": "test123",
-        "short_description": "there",
-        "upc_code": "0943113854446",
-        "model_number": "j-587-L3H",
-        "commodity_code": "67-vxkaB7P",
-        "item_line": 16,
-        "item_group": 50,
-        "item_type": 28,
-        "unit_purchase_quantity": 44,
-        "unit_order_quantity": 2,
-        "pack_order_quantity": 20,
-        "supplier_id": 35,
-        "supplier_code": "SUP347",
-        "supplier_part_number": "NzG-36a1",
-        "created_at": "2016-03-28 10:35:32",
-        "updated_at": "2024-05-20 22:42:05"
-    })
-
+    test_data = {
+        "uid": "P999999",
+        "code": "mYt79640E",
+        "description": "Down-sized system-worthy productivity",
+        "short_description": "pass",
+        "upc_code": "2541112620796",
+        "model_number": "ZK-417773-PXy",
+        "commodity_code": "z-761-L5A",
+        "item_line": 81,
+        "item_group": 83,
+        "item_type": 74,
+        "unit_purchase_quantity": 3,
+        "unit_order_quantity": 18,
+        "pack_order_quantity": 13,
+        "supplier_id": 10,
+        "supplier_code": "SUP468",
+        "supplier_part_number": "ZH-103509-MLv",
+        "created_at": "2024-10-06 02:30:31",
+        "updated_at": "2024-10-06 02:30:31"
+    }
+    jsonData = json.dumps(test_data)
     connection.request(
-        'PUT',
-        f"{url}/items/P000005",
+        'POST',
+        f"{url}/items",
         headers={
             "API_KEY": key,
             "Content-Type": "application/json"},
         body=jsonData)
-    time.sleep(2)
+    connection.getresponse()
+
+    test_updated_data = {
+        "uid": "P999999",
+        "code": "mYt79640E",
+        "description": "Down-sized system-worthy productivity",
+        "short_description": "pass",
+        "upc_code": "2541112620796",
+        "model_number": "ZK-417773-PXy",
+        "commodity_code": "z-761-L5A",
+        "item_line": 81,
+        "item_group": 83,
+        "item_type": 74,
+        "unit_purchase_quantity": 3,
+        "unit_order_quantity": 18,
+        "pack_order_quantity": 13,
+        "supplier_id": 10,
+        "supplier_code": "SUP468",
+        "supplier_part_number": "ZH-103509-MLv",
+        "created_at": "2024-10-06 02:30:31",
+        "updated_at": "2024-10-06 02:30:31"
+    }
+
+    jsonData = json.dumps(test_updated_data)
+    
+    connection.request(
+        'PUT',
+        f"{url}/items/P999999",
+        headers={
+            "API_KEY": key,
+            "Content-Type": "application/json"},
+        body=jsonData)
     response = connection.getresponse()
 
     assert response.code == 200
 
-    connection.request('GET', f"{url}/items/P000005", headers={"API_KEY": key})
-    response = connection.getresponse()
-    data = response.read()
-    result = json.loads(data)
+    connection.request('GET', f"{url}/items/P999999", headers={"API_KEY": key})
+    get_response = connection.getresponse()
+    get_data = get_response.read()
+    get_result = json.loads(get_data)
 
-    jsonData = json.dumps({
-        "uid": "P000005",
-        "code": "mHo61152n",
-        "description": "Stand-alone 24hour emulation",
-        "short_description": "there",
-        "upc_code": "0943113854446",
-        "model_number": "j-587-L3H",
-        "commodity_code": "67-vxkaB7P",
-        "item_line": 16,
-        "item_group": 50,
-        "item_type": 28,
-        "unit_purchase_quantity": 44,
-        "unit_order_quantity": 2,
-        "pack_order_quantity": 20,
-        "supplier_id": 35,
-        "supplier_code": "SUP347",
-        "supplier_part_number": "NzG-36a1",
-        "created_at": "2016-03-28 10:35:32",
-        "updated_at": "2024-05-20 22:42:05"
-    })
-    connection.request(
-        'PUT',
-        f"{url}/items/P000005",
-        headers={
-            "API_KEY": key,
-            "Content-Type": "application/json"},
-        body=jsonData)
-    time.sleep(2)
-    response = connection.getresponse()
-    assert result['description'] == "test123"
+    connection.request('DELETE', f"{url}/items/P999999", headers={"API_KEY": key})
+    delete_response = connection.getresponse()
+    assert delete_response.status == 200, "delete failed"
+
+    assert response.status == 200
+    assert get_result["uid"] == test_updated_data["uid"] 
+    assert get_result["code"] == test_updated_data["code"] 
+    assert get_result["description"] == test_updated_data["description"] 
+    assert get_result["short_description"] == test_updated_data["short_description"] 
+    assert get_result["upc_code"] == test_updated_data["upc_code"] 
+    assert get_result["model_number"] == test_updated_data["model_number"] 
+    assert get_result["commodity_code"] == test_updated_data["commodity_code"] 
+    assert get_result["item_line"] == test_updated_data["item_line"] 
+    assert get_result["item_group"] == test_updated_data["item_group"] 
+    assert get_result["item_type"] == test_updated_data["item_type"] 
+    assert get_result["unit_purchase_quantity"] == test_updated_data["unit_purchase_quantity"] 
+    assert get_result["unit_order_quantity"] == test_updated_data["unit_order_quantity"] 
+    assert get_result["pack_order_quantity"] == test_updated_data["pack_order_quantity"] 
+    assert get_result["supplier_id"] == test_updated_data["supplier_id"] 
+    assert get_result["supplier_code"] == test_updated_data["supplier_code"] 
+    assert get_result["supplier_part_number"] == test_updated_data["supplier_part_number"] 
 
 
 def test_delete_item(_data):
