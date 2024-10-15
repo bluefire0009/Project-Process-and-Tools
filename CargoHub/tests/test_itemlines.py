@@ -106,7 +106,6 @@ def test_put_item_line(_data):
         "updated_at": "2018-02-04 11:31:03"
     })
 
-    connection = http.client.HTTPConnection('localhost', 3000)
     connection.request(
         'PUT',
         f"{url}/item_lines/5",
@@ -133,7 +132,6 @@ def test_put_item_line(_data):
         "updated_at": "2018-02-04 11:31:03"
     })
 
-    connection = http.client.HTTPConnection('localhost', 3000)
     connection.request(
         'PUT',
         f"{url}/item_lines/5",

@@ -160,7 +160,6 @@ def test_put_item(_data):
         "updated_at": "2024-05-20 22:42:05"
     })
 
-    connection = http.client.HTTPConnection('localhost', 3000)
     connection.request(
         'PUT',
         f"{url}/items/P000005",
