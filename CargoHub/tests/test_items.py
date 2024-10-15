@@ -252,7 +252,7 @@ def test_get_item_invalid_id(_data):
     connection.request('GET', f"{url}/items/invalidIdentification", headers={"API_KEY": key})
     response = connection.getresponse()
 
-    assert response.status == 500
+    assert response.status == 400
 
 
 def test_post_invalid_object(_data):
@@ -270,4 +270,4 @@ def test_post_invalid_object(_data):
     time.sleep(1)
     response = connection.getresponse()
 
-    assert response.status == 201
+    assert response.status == 400
