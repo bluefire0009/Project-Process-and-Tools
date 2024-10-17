@@ -33,17 +33,17 @@ def test_get_all(_DataPytestFixture):
     # list comprehension to get a list of all warehouse id's
     warehousesIds = [w["id"] for w in warehouses]
     
-    # Assert
-    assert str(response.status) == '200'
-    assert len(warehouses) >= 2
-    for warehouse in _testWarehouses:
-        assert warehouse["id"] in warehousesIds
-
     # Clean up
     for warehouse in _testWarehouses:
         json_data = json.dumps(warehouse).encode('utf-8')
         _connection.request('DELETE',f'{_url}/{warehouse["id"]}', headers=_headers)
         _connection.getresponse().close()
+
+    # Assert
+    assert str(response.status) == '200'
+    assert len(warehouses) >= 2
+    for warehouse in _testWarehouses:
+        assert warehouse["id"] in warehousesIds
 
         
 def test_get_one(_DataPytestFixture):
@@ -63,6 +63,12 @@ def test_get_one(_DataPytestFixture):
     response = _connection.getresponse()
     data = response.read()
     warehouseAfter = json.loads(data)
+    
+    # Clean up
+    for warehouse in _testWarehouses:
+        json_data = json.dumps(warehouse).encode('utf-8')
+        _connection.request('DELETE',f'{_url}/{warehouse["id"]}', headers=_headers)
+        _connection.getresponse().close()
 
     # Assert
     assert str(response.status) == '200'
@@ -75,12 +81,6 @@ def test_get_one(_DataPytestFixture):
     assert warehouseAfter["province"] == _testWarehouses[0]["province"]
     assert warehouseAfter["country"] == _testWarehouses[0]["country"]
     assert warehouseAfter["contact"] == _testWarehouses[0]["contact"]
-    
-    # Clean up
-    for warehouse in _testWarehouses:
-        json_data = json.dumps(warehouse).encode('utf-8')
-        _connection.request('DELETE',f'{_url}/{warehouse["id"]}', headers=_headers)
-        _connection.getresponse().close()
 
 def test_put_warehouse(_DataPytestFixture):
     # Arrange
@@ -108,6 +108,14 @@ def test_put_warehouse(_DataPytestFixture):
     data = response.read()
     warehouseAfter = json.loads(data)
     
+    # Clean up
+    _connection.request('DELETE',f'{_url}/{extraWarehouse["id"]}', headers=_headers)
+    _connection.getresponse().close()
+    for warehouse in _testWarehouses:
+        json_data = json.dumps(warehouse).encode('utf-8')
+        _connection.request('DELETE',f'{_url}/{warehouse["id"]}', headers=_headers)
+        _connection.getresponse().close()
+
     # Assert
     assert putStatusCode == 200
     assert warehouseAfter["code"] == extraWarehouse["code"]
@@ -118,14 +126,6 @@ def test_put_warehouse(_DataPytestFixture):
     assert warehouseAfter["province"] == extraWarehouse["province"]
     assert warehouseAfter["country"] == extraWarehouse["country"]
     assert warehouseAfter["contact"] == extraWarehouse["contact"]
-
-    # Clean up
-    _connection.request('DELETE',f'{_url}/{extraWarehouse["id"]}', headers=_headers)
-    _connection.getresponse().close()
-    for warehouse in _testWarehouses:
-        json_data = json.dumps(warehouse).encode('utf-8')
-        _connection.request('DELETE',f'{_url}/{warehouse["id"]}', headers=_headers)
-        _connection.getresponse().close()
 
 def test_delete_warehouse(_DataPytestFixture):
     # Arrange  
@@ -156,13 +156,13 @@ def test_delete_warehouse(_DataPytestFixture):
     response = _connection.getresponse()
     warehouseAfter = response.read()
     
-    # Assert
-    # "b'null'" Means that no warehouse was found
-    assert str(warehouseAfter) == "b'null'"
-    assert deleteStatusCode == 200
-
     # Clean up
     for warehouse in _testWarehouses:
         json_data = json.dumps(warehouse).encode('utf-8')
         _connection.request('DELETE',f'{_url}/{warehouse["id"]}', headers=_headers)
         _connection.getresponse().close()
+
+    # Assert
+    # "b'null'" Means that no warehouse was found
+    assert str(warehouseAfter) == "b'null'"
+    assert deleteStatusCode == 200

@@ -36,6 +36,12 @@ def test_post_supplier(_DataPytestFixture):
     # list comprehension to get a list of all supplier id's
     supplierIds = [s["id"] for s in suppliers]
     
+    # Clean up
+    for supplier in _testSuppliers:
+        json_data = json.dumps(supplier).encode('utf-8')
+        _connection.request('DELETE',f'{_url}/{supplier["id"]}', headers=_headers)
+        _connection.getresponse().close()
+
     # Assert
     assert len(suppliers) >= 2
     for supplier in _testSuppliers:
@@ -43,12 +49,6 @@ def test_post_supplier(_DataPytestFixture):
 
     for status in postStatuss:
         assert status == 201
-
-    # Clean up
-    for supplier in _testSuppliers:
-        json_data = json.dumps(supplier).encode('utf-8')
-        _connection.request('DELETE',f'{_url}/{supplier["id"]}', headers=_headers)
-        _connection.getresponse().close()
 
 def test_get_all(_DataPytestFixture):
     # Arrange
@@ -70,17 +70,17 @@ def test_get_all(_DataPytestFixture):
     # list comprehension to get a list of all supplier id's
     supplierIds = [s["id"] for s in suppliers]
     
-    # Assert
-    assert str(response.status) == '200'
-    assert len(suppliers) >= 2
-    for supplier in _testSuppliers:
-        assert supplier["id"] in supplierIds
-
     # Clean up
     for supplier in _testSuppliers:
         json_data = json.dumps(supplier).encode('utf-8')
         _connection.request('DELETE',f'{_url}/{supplier["id"]}', headers=_headers)
         _connection.getresponse().close()
+
+    # Assert
+    assert str(response.status) == '200'
+    assert len(suppliers) >= 2
+    for supplier in _testSuppliers:
+        assert supplier["id"] in supplierIds
 
         
 def test_get_one(_DataPytestFixture):
@@ -101,6 +101,12 @@ def test_get_one(_DataPytestFixture):
     data = response.read()
     supplierAfter = json.loads(data)
 
+    # Clean up
+    for supplier in _testSuppliers:
+        json_data = json.dumps(supplier).encode('utf-8')
+        _connection.request('DELETE',f'{_url}/{supplier["id"]}', headers=_headers)
+        _connection.getresponse().close()
+
     # Assert
     assert str(response.status) == '200'
     assert type(supplierAfter) == dict
@@ -116,12 +122,6 @@ def test_get_one(_DataPytestFixture):
     assert supplierAfter["contact_name"] == _testSuppliers[0]["contact_name"]
     assert supplierAfter["phonenumber"] == _testSuppliers[0]["phonenumber"]
     assert supplierAfter["reference"] == _testSuppliers[0]["reference"]
-    
-    # Clean up
-    for supplier in _testSuppliers:
-        json_data = json.dumps(supplier).encode('utf-8')
-        _connection.request('DELETE',f'{_url}/{supplier["id"]}', headers=_headers)
-        _connection.getresponse().close()
 
 def test_get_one_items(_DataPytestFixture):
     # Arrange
@@ -147,6 +147,14 @@ def test_get_one_items(_DataPytestFixture):
     data = response.read()
     itemAfter = json.loads(data)
 
+    # Clean up
+    _connection.request('DELETE', f'/api/v1/items/{test_item["uid"]}', headers=_headers)
+    _connection.getresponse().close()
+    for supplier in _testSuppliers:
+        json_data = json.dumps(supplier).encode('utf-8')
+        _connection.request('DELETE',f'{_url}/{supplier["id"]}', headers=_headers)
+        _connection.getresponse().close()
+
     # Assert
     assert test_item['uid'] == itemAfter[0]['uid']
     assert test_item['code'] == itemAfter[0]['code']
@@ -167,14 +175,6 @@ def test_get_one_items(_DataPytestFixture):
 
     assert itemAfter[0]['supplier_id'] == _testSuppliers[0]['id']
     assert itemAfter[0]['supplier_code'] == _testSuppliers[0]['code']
-    
-    # Clean up
-    _connection.request('DELETE', f'/api/v1/items/{test_item["uid"]}', headers=_headers)
-    _connection.getresponse().close()
-    for supplier in _testSuppliers:
-        json_data = json.dumps(supplier).encode('utf-8')
-        _connection.request('DELETE',f'{_url}/{supplier["id"]}', headers=_headers)
-        _connection.getresponse().close()
 
 def test_put_supplier(_DataPytestFixture):
     # Arrange
@@ -202,6 +202,14 @@ def test_put_supplier(_DataPytestFixture):
     data = response.read()
     supplierAfter = json.loads(data)
     
+    # Clean up
+    _connection.request('DELETE',f'{_url}/{extraSupplier["id"]}', headers=_headers)
+    _connection.getresponse().close()
+    for supplier in _testSuppliers:
+        json_data = json.dumps(supplier).encode('utf-8')
+        _connection.request('DELETE',f'{_url}/{supplier["id"]}', headers=_headers)
+        _connection.getresponse().close()
+
     # Assert
     assert putStatusCode == 200
     assert supplierAfter["id"] == extraSupplier["id"]
@@ -216,14 +224,6 @@ def test_put_supplier(_DataPytestFixture):
     assert supplierAfter["contact_name"] == extraSupplier["contact_name"]
     assert supplierAfter["phonenumber"] == extraSupplier["phonenumber"]
     assert supplierAfter["reference"] == extraSupplier["reference"]
-
-    # Clean up
-    _connection.request('DELETE',f'{_url}/{extraSupplier["id"]}', headers=_headers)
-    _connection.getresponse().close()
-    for supplier in _testSuppliers:
-        json_data = json.dumps(supplier).encode('utf-8')
-        _connection.request('DELETE',f'{_url}/{supplier["id"]}', headers=_headers)
-        _connection.getresponse().close()
 
 def test_delete_supplier(_DataPytestFixture):
     # Arrange  
@@ -248,16 +248,16 @@ def test_delete_supplier(_DataPytestFixture):
     response = _connection.getresponse()
     supplierAfter = response.read()
     
-    # Assert
-    # "b'null'" Means that no supplier was found
-    assert str(supplierAfter) == "b'null'"
-    assert deleteStatusCode == 200
-
     # Clean up
     for supplier in _testSuppliers:
         json_data = json.dumps(supplier).encode('utf-8')
         _connection.request('DELETE',f'{_url}/{supplier["id"]}', headers=_headers)
         _connection.getresponse().close()
+        
+    # Assert
+    # "b'null'" Means that no supplier was found
+    assert str(supplierAfter) == "b'null'"
+    assert deleteStatusCode == 200
 
 def test_add_supplier_wrong_format(_DataPytestFixture):
     # Arrange  
