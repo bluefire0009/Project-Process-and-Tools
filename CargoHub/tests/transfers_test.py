@@ -35,6 +35,12 @@ def test_post_transfer(_DataPytestFixture):
     # list comprehension to get a list of all transfer id's
     transferIds = [s["id"] for s in transfers]
     
+    # Clean up
+    for transfer in _testTransfers:
+        json_data = json.dumps(transfer).encode('utf-8')
+        _connection.request('DELETE',f'{_url}/{transfer["id"]}', headers=_headers)
+        _connection.getresponse().close()
+
     # Assert
     assert len(transfers) >= 2
     for transfer in _testTransfers:
@@ -42,12 +48,6 @@ def test_post_transfer(_DataPytestFixture):
     
     for status in postStatuss:
         assert status == 201
-
-    # Clean up
-    for transfer in _testTransfers:
-        json_data = json.dumps(transfer).encode('utf-8')
-        _connection.request('DELETE',f'{_url}/{transfer["id"]}', headers=_headers)
-        _connection.getresponse().close()
 
 def test_get_all(_DataPytestFixture):
     # Arrange
@@ -67,17 +67,17 @@ def test_get_all(_DataPytestFixture):
     # list comprehension to get a list of all transfer id's
     transferIds = [s["id"] for s in transfers]
     
-    # Assert
-    assert str(response.status) == '200'
-    assert len(transfers) >= 2
-    for transfer in _testTransfers:
-        assert transfer["id"] in transferIds
-
     # Clean up
     for transfer in _testTransfers:
         json_data = json.dumps(transfer).encode('utf-8')
         _connection.request('DELETE',f'{_url}/{transfer["id"]}', headers=_headers)
         _connection.getresponse().close()
+
+    # Assert
+    assert str(response.status) == '200'
+    assert len(transfers) >= 2
+    for transfer in _testTransfers:
+        assert transfer["id"] in transferIds
 
         
 def test_get_one(_DataPytestFixture):
@@ -95,6 +95,12 @@ def test_get_one(_DataPytestFixture):
     response = _connection.getresponse()
     data = response.read()
     transferAfter = json.loads(data)
+    
+    # Clean up
+    for transfer in _testTransfers:
+        json_data = json.dumps(transfer).encode('utf-8')
+        _connection.request('DELETE',f'{_url}/{transfer["id"]}', headers=_headers)
+        _connection.getresponse().close()
 
     # Assert
     assert str(response.status) == '200'
@@ -105,12 +111,6 @@ def test_get_one(_DataPytestFixture):
     assert transferAfter["transfer_to"] == _testTransfers[0]["transfer_to"]
     assert transferAfter["transfer_status"] == _testTransfers[0]["transfer_status"]
     assert transferAfter["items"] == _testTransfers[0]["items"]
-    
-    # Clean up
-    for transfer in _testTransfers:
-        json_data = json.dumps(transfer).encode('utf-8')
-        _connection.request('DELETE',f'{_url}/{transfer["id"]}', headers=_headers)
-        _connection.getresponse().close()
 
 def test_get_one_items(_DataPytestFixture):
     # Arrange
@@ -127,15 +127,15 @@ def test_get_one_items(_DataPytestFixture):
     response = _connection.getresponse()
     data = response.read()
     itemsAfter = json.loads(data)
-
-    # Assert
-    assert _testTransfers[0]['items'] == itemsAfter
         
     # Clean up
     for transfer in _testTransfers:
         json_data = json.dumps(transfer).encode('utf-8')
         _connection.request('DELETE',f'{_url}/{transfer["id"]}', headers=_headers)
         _connection.getresponse().close()
+
+    # Assert
+    assert _testTransfers[0]['items'] == itemsAfter
 
 def test_put_transfer(_DataPytestFixture):
     # Arrange
@@ -161,6 +161,14 @@ def test_put_transfer(_DataPytestFixture):
     data = response.read()
     transferAfter = json.loads(data)
     
+    # Clean up
+    _connection.request('DELETE',f'{_url}/{extraTransfer["id"]}', headers=_headers)
+    _connection.getresponse().close()
+    for transfer in _testTransfers:
+        json_data = json.dumps(transfer).encode('utf-8')
+        _connection.request('DELETE',f'{_url}/{transfer["id"]}', headers=_headers)
+        _connection.getresponse().close()
+
     # Assert
     assert str(putStatusCode) == '200'
     assert type(transferAfter) == dict
@@ -170,14 +178,6 @@ def test_put_transfer(_DataPytestFixture):
     assert transferAfter["transfer_to"] == extraTransfer["transfer_to"]
     assert transferAfter["transfer_status"] == extraTransfer["transfer_status"]
     assert transferAfter["items"] == extraTransfer["items"]
-
-    # Clean up
-    _connection.request('DELETE',f'{_url}/{extraTransfer["id"]}', headers=_headers)
-    _connection.getresponse().close()
-    for transfer in _testTransfers:
-        json_data = json.dumps(transfer).encode('utf-8')
-        _connection.request('DELETE',f'{_url}/{transfer["id"]}', headers=_headers)
-        _connection.getresponse().close()
 
 # DOESN'T WORK BECAUSE THERE IS NO FIELD "location_id"
 def test_put_transfer_commit(_DataPytestFixture):
@@ -200,8 +200,6 @@ def test_put_transfer_commit(_DataPytestFixture):
     _connection.request('PUT',f'{_url}/{_testTransfers[0]["id"]}/commit', headers=_headers)
     update_status = _connection.getresponse()
 
-    # Assert
-
     # Clean up
     _connection.request('DELETE',f'/api/v1/locations/{testLocation["id"]}', headers=_headers)
     _connection.getresponse().close()
@@ -209,6 +207,8 @@ def test_put_transfer_commit(_DataPytestFixture):
         json_data = json.dumps(transfer).encode('utf-8')
         _connection.request('DELETE',f'{_url}/{transfer["id"]}', headers=_headers)
         _connection.getresponse().close()
+
+    # Assert
 
 def test_delete_transfer(_DataPytestFixture):
     # Arrange  
@@ -230,17 +230,17 @@ def test_delete_transfer(_DataPytestFixture):
     _connection.request('GET', f'{_url}/{_testTransfers[0]["id"]}', headers=_headers)
     response = _connection.getresponse()
     transferAfter = response.read()
-    
-    # Assert
-    # "b'null'" Means that no transfer was found
-    assert str(transferAfter) == "b'null'"
-    assert deleteStatusCode == 200
-
+ 
     # Clean up
     for transfer in _testTransfers:
         json_data = json.dumps(transfer).encode('utf-8')
         _connection.request('DELETE',f'{_url}/{transfer["id"]}', headers=_headers)
         _connection.getresponse().close()
+   
+    # Assert
+    # "b'null'" Means that no transfer was found
+    assert str(transferAfter) == "b'null'"
+    assert deleteStatusCode == 200
 
 def test_add_transfer_wrong_format(_DataPytestFixture):
     # Arrange  
