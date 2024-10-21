@@ -187,3 +187,35 @@ def test_delete_client(_DataPytestFixture):
         assert data["name"] == "Test Client"
     except requests.exceptions.JSONDecodeError:
         print("Failed to decode JSON. Response was not valid JSON.")
+
+# Test GET client WRONG ID
+def test_get_client_by_invalid_id_type(_DataPytestFixture):
+    url, api_key = _DataPytestFixture
+    invalid_client_id = "invalid_id"  # Pass a string instead of an integer
+
+    # Send the request to get client by an invalid ID type
+    response = requests.get(f"{url}/clients/{invalid_client_id}", headers={"API_KEY": api_key})
+
+    # Assert the status code is 400 (Bad Request) or another appropriate status code (like 422 Unprocessable Entity)
+    assert response.status_code == 400 or response.status_code == 422
+
+    # Parse the response data
+    data = response.json()
+
+    # Optionally, you can assert the response contains an appropriate error message
+    assert "error" in data
+    assert data["error"] == "Invalid client ID format"  # Adjust this based on the actual error message returned by the API
+
+
+def test_delete_non_existent_id_type(_DataPytestFixture):
+    url, api_key = _DataPytestFixture
+    invalid_id = "non_existent_id"  # Pass a string instead of an integer
+    
+    # Send the DELETE request with an invalid ID type
+    response = requests.delete(f"{url}/items/{invalid_id}", headers={"API_KEY": api_key})
+    
+    # Assert that the status code is 400 (Bad Request) or 422 (Unprocessable Entity), depending on API design
+    assert response.status_code == 400 or response.status_code == 422, f"Unexpected status code: {response.status_code}"
+    
+    # Optionally, print the response for debugging purposes
+    print(response.text)
