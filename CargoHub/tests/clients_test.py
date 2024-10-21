@@ -196,16 +196,15 @@ def test_get_client_by_invalid_id_type(_DataPytestFixture):
     # Send the request to get client by an invalid ID type
     response = requests.get(f"{url}/clients/{invalid_client_id}", headers={"API_KEY": api_key})
 
-    # Temporarily allow 500 for now but expect to fix this in the API later
-    assert response.status_code == 500, f"Unexpected status code: {response.status_code}"
+    # Assert the status code is 400 (Bad Request) or another appropriate status code (like 422 Unprocessable Entity)
+    assert response.status_code == 400 or response.status_code == 422
 
-    # Check if the response contains valid JSON content
-    try:
-        data = response.json()
-        assert "error" in data, "Expected error message in the response"
-    except requests.exceptions.JSONDecodeError:
-        # Handle cases where the response does not contain valid JSON
-        assert response.text == "", "Expected empty response body for 500 error"
+    # Parse the response data
+    data = response.json()
+
+    # Optionally, you can assert the response contains an appropriate error message
+    assert "error" in data
+    assert data["error"] == "Invalid client ID format"  # Adjust this based on the actual error message returned by the API
 
 
 def test_delete_non_existent_id_type(_DataPytestFixture):
@@ -215,9 +214,8 @@ def test_delete_non_existent_id_type(_DataPytestFixture):
     # Send the DELETE request with an invalid ID type
     response = requests.delete(f"{url}/items/{invalid_id}", headers={"API_KEY": api_key})
     
-    # Allow for 200 OK but also check if the ID was actually deleted or not
-    # The API passes de string even though it isn't an id. This needs to be fixed later on
-    assert response.status_code == 400 or response.status_code == 422 or response.status_code == 200, f"Unexpected status code: {response.status_code}"
+    # Assert that the status code is 400 (Bad Request) or 422 (Unprocessable Entity), depending on API design
+    assert response.status_code == 400 or response.status_code == 422, f"Unexpected status code: {response.status_code}"
     
-    if response.status_code == 200:
-        print(f"Warning: Resource with invalid ID {invalid_id} returned 200 OK. Check API behavior.")
+    # Optionally, print the response for debugging purposes
+    print(response.text)
